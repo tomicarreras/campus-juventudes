@@ -78,10 +78,10 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
       </div>
 
-      {/* ------------------ MOBILE (botón FIXED arriba, centrado) ------------------ */}
+      {/* ------------------ MOBILE (botón FIXED abajo del navbar) ------------------ */}
       <div className="md:hidden">
-        {/* Barra FIXED en top, full width. El inner container centra el botón */}
-        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b">
+        {/* Barra FIXED en top pero desplazada para quedar *debajo* del navbar: top-16 */}
+        <div className="fixed top-16 left-0 right-0 z-50 bg-white border-b">
           <div className="max-w-7xl mx-auto px-4">
             <div className="w-full flex justify-center">
               <button
@@ -98,24 +98,22 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
 
         {/* Spacer para que el contenido debajo no quede tapado por la barra fixed */}
-        <div className="h-14" />
+        <div className="h-16" />
 
-        {/* Overlay */}
+        {/* Overlay: comienza en top-16 para no tapar el navbar */}
         <div
-          className={`fixed inset-0 z-40 transition-opacity ${
+          className={`fixed left-0 right-0 top-16 bottom-0 z-40 transition-opacity ${
             open ? "opacity-60 pointer-events-auto" : "opacity-0 pointer-events-none"
           }`}
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           onClick={() => setOpen(false)}
         />
 
-        {/* Drawer desde arriba (full width) */}
+        {/* Drawer desde debajo del botón (también desplazado top-16) */}
         <div
           role="dialog"
           aria-modal="true"
-          className={`fixed top-0 left-0 right-0 z-50 transform transition-transform ${
-            open ? "translate-y-0" : "-translate-y-full"
-          }`}
+          className={`fixed left-0 right-0 z-50 transform transition-transform ${open ? "translate-y-0" : "-translate-y-full"} top-16`}
         >
           <div className="bg-white border-b shadow-md">
             <div className="flex items-center justify-between px-4 py-3">
