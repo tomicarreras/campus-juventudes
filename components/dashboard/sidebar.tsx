@@ -18,11 +18,6 @@ interface SidebarProps {
   onSectionChange: (section: string) => void
 }
 
-/**
- * Sidebar responsive:
- * - md+ -> sidebar vertical a la izquierda (igual que antes)
- * - <md -> topbar con logo + hamburguesa. Al abrir, aparece un panel con las opciones (se cierra al seleccionar).
- */
 export default function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   const [open, setOpen] = useState(false)
 
@@ -34,7 +29,6 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
     { id: "exportar", label: "Exportar Planillas", icon: FileSpreadsheet },
   ]
 
-  // Cerrar con Esc y bloquear scroll cuando el drawer esté abierto
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") setOpen(false)
@@ -44,11 +38,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
   }, [])
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
-    }
+    if (open) document.body.style.overflow = "hidden"
+    else document.body.style.overflow = ""
     return () => {
       document.body.style.overflow = ""
     }
@@ -61,13 +52,8 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:block w-64 bg-gray-50 border-r min-h-screen p-4">
-        <div className="flex items-center mb-6">
-          <img src="/logo.png" alt="Logo" className="h-10 w-auto object-contain" />
-          <h2 className="ml-3 text-lg font-semibold">WorkBot</h2>
-        </div>
-
+      {/* --- DESKTOP: exacto al que tenías --- */}
+      <div className="hidden md:block w-64 bg-gray-50 border-r min-h-screen p-4">
         <div className="space-y-2">
           <Button
             onClick={() => onSectionChange("crear-grupo")}
@@ -90,52 +76,40 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
             </Button>
           ))}
         </div>
-      </aside>
+      </div>
 
-      {/* Mobile Topbar */}
+      {/* --- MOBILE TOPBAR con hamburguesa (aparece sólo en < md) --- */}
       <header className="md:hidden w-full bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center space-x-2">
-              <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" />
-              <span className="text-sm font-medium">WorkBot</span>
-            </div>
+        <div className="w-full px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center">
+            <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" />
+          </div>
 
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setOpen(true)}
-                aria-label="Abrir menú"
-                className="p-2"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </div>
+          <div>
+            <Button variant="ghost" size="sm" onClick={() => setOpen(true)} aria-label="Abrir menú">
+              <Menu className="h-5 w-5" />
+            </Button>
           </div>
         </div>
 
-        {/* Mobile drawer / dropdown */}
-        {/* Fondo overlay */}
+        {/* Overlay */}
         <div
-          aria-hidden={!open}
           className={`fixed inset-0 z-40 transition-opacity ${open ? "opacity-60 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-          onClick={() => setOpen(false)}
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          onClick={() => setOpen(false)}
         />
 
+        {/* Drawer desde arriba */}
         <div
           role="dialog"
           aria-modal="true"
-          className={`fixed top-0 left-0 right-0 z-50 transform transition-transform ${
-            open ? "translate-y-0" : "-translate-y-full"
-          }`}
+          className={`fixed top-0 left-0 right-0 z-50 transform transition-transform ${open ? "translate-y-0" : "-translate-y-full"}`}
         >
           <div className="bg-white border-b shadow-md">
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center space-x-2">
-                <img src="/logo.png" alt="Logo" className="h-8 object-contain" />
-                <span className="font-semibold">Menu</span>
+                <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" />
+                <span className="font-medium">Menu</span>
               </div>
               <Button variant="ghost" onClick={() => setOpen(false)} aria-label="Cerrar menú">
                 <X className="h-5 w-5" />

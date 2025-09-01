@@ -16,8 +16,7 @@ export default function Navbar() {
       try {
         const { user } = await getCurrentUser()
         if (mounted) setUser(user)
-      } catch (e) {
-        // opcional: manejar error
+      } catch {
         if (mounted) setUser(null)
       }
     }
@@ -34,35 +33,30 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Container: en mobile columna, en md+ fila */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between h-auto md:h-16 py-3 md:py-0">
-          {/* Izquierda: logo + saludo (siempre en la misma linea) */}
-          <div className="flex items-center space-x-3">
-            <img
-              src="/logo.png"
-              alt="Logo del Sistema"
-              className="h-10 w-auto object-contain"
-            />
-            <span className="text-sm text-gray-600 hidden sm:inline">
-              Hola, {user?.full_name || "Profesor"}
-            </span>
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        {/* --- DESKTOP / TABLET: exactamente tu layout original --- */}
+        <div className="hidden md:flex justify-between items-center h-16">
+          <div className="flex items-center">
+            <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-600">Hola, {user?.full_name || "Profesor"}</span>
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Salir
+            </Button>
+          </div>
+        </div>
+
+        {/* --- MOBILE: logo + saludo en una línea, botón Salir en fila separada alineado a la derecha --- */}
+        <div className="md:hidden flex flex-col py-3">
+          <div className="flex items-center">
+            <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
+            <span className="ml-3 text-sm text-gray-600">Hola, {user?.full_name || "Profesor"}</span>
           </div>
 
-          {/* Derecha / area mobile: en mobile el boton baja */}
-          <div className="mt-3 md:mt-0 md:ml-4 flex items-center justify-end">
-            {/* En pantallas pequeñas mostramos el saludo compacto (si ocultamos por width) */}
-            <span className="text-sm text-gray-600 sm:hidden mr-3">
-              Hola, {user?.full_name || "Profesor"}
-            </span>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSignOut}
-              className="flex items-center"
-              aria-label="Cerrar sesión"
-            >
+          <div className="mt-3 flex justify-end">
+            <Button variant="outline" size="sm" onClick={handleSignOut} className="flex items-center">
               <LogOut className="h-4 w-4 mr-2" />
               Salir
             </Button>
