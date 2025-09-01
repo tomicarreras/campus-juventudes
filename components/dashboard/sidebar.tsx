@@ -52,7 +52,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
 
   return (
     <>
-      {/* DESKTOP: exacto al que tenías */}
+      {/* ------------------ DESKTOP (sin cambios) ------------------ */}
       <div className="hidden md:block w-64 bg-gray-50 border-r min-h-screen p-4">
         <div className="space-y-2">
           <Button
@@ -78,22 +78,27 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
       </div>
 
-      {/* MOBILE: botón centrado (sin logo), todo el ancho disponible para contenido */}
+      {/* ------------------ MOBILE (botón FIXED arriba, centrado) ------------------ */}
       <div className="md:hidden">
-        <div className="w-full border-b bg-white sticky top-0 z-50">
-          {/* Flex padre que CENTRA su hijo */}
-          <div className="w-full flex justify-center">
-            {/* Botón nativo para evitar estilos inesperados del componente Button */}
-            <button
-              onClick={() => setOpen(true)}
-              aria-label="Abrir menú"
-              className="max-w-xs w-full flex items-center justify-center gap-2 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
-            >
-              <Menu className="h-5 w-5" />
-              <span>Menu</span>
-            </button>
+        {/* Barra FIXED en top, full width. El inner container centra el botón */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="w-full flex justify-center">
+              <button
+                onClick={() => setOpen(true)}
+                aria-label="Abrir menú"
+                className="max-w-xs w-full flex items-center justify-center gap-2 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
+                style={{ maxWidth: 240 }}
+              >
+                <Menu className="h-5 w-5" />
+                <span>Menu</span>
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Spacer para que el contenido debajo no quede tapado por la barra fixed */}
+        <div className="h-14" />
 
         {/* Overlay */}
         <div
