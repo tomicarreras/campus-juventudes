@@ -78,18 +78,18 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
       </div>
 
-      {/* --- MOBILE TOPBAR con hamburguesa (aparece sólo en < md) --- */}
+      {/* --- MOBILE TOPBAR minimal: solo HAMBURGER + "Menu" (sin logo) --- */}
       <header className="md:hidden w-full bg-white border-b">
-        <div className="w-full px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" />
-          </div>
-
-          <div>
-            <Button variant="ghost" size="sm" onClick={() => setOpen(true)} aria-label="Abrir menú">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
+        <div className="w-full px-4 py-2 flex items-center">
+          {/* Botón hamburguesa + texto "Menu" a la izquierda. Nada a la derecha para que el contenido tenga todo el ancho. */}
+          <button
+            onClick={() => setOpen(true)}
+            aria-label="Abrir menú"
+            className="flex items-center gap-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
+          >
+            <Menu className="h-5 w-5" />
+            <span>Menu</span>
+          </button>
         </div>
 
         {/* Overlay */}
@@ -99,7 +99,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
           onClick={() => setOpen(false)}
         />
 
-        {/* Drawer desde arriba */}
+        {/* Drawer: ocupa todo el ancho y aparece desde arriba; al abrir deja el contenido debajo intacto */}
         <div
           role="dialog"
           aria-modal="true"
@@ -107,13 +107,18 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         >
           <div className="bg-white border-b shadow-md">
             <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center space-x-2">
-                <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain" />
+              <div className="flex items-center gap-3">
+                <Menu className="h-5 w-5" />
                 <span className="font-medium">Menu</span>
               </div>
-              <Button variant="ghost" onClick={() => setOpen(false)} aria-label="Cerrar menú">
+
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Cerrar menú"
+                className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-2"
+              >
                 <X className="h-5 w-5" />
-              </Button>
+              </button>
             </div>
 
             <div className="px-4 pb-6 space-y-2">
