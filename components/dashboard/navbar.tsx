@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
@@ -26,14 +25,17 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
+        {/* Contenedor flex, columna en móvil, fila en desktop */}
+        <div className="flex flex-col md:flex-row justify-between items-center h-auto md:h-16 py-2 md:py-0">
+          <div className="flex items-center mb-2 md:mb-0">
+            <img src="/logo.png" alt="Logo del Sistema" className="h-10 w-auto" />
           </div>
 
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">Hola, {user?.full_name || "Profesor"}</span>
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
+          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-4 w-full md:w-auto">
+            <span className="text-sm text-gray-600 text-center md:text-left">
+              Hola, {user?.full_name || "Profesor"}
+            </span>
+            <Button variant="outline" size="sm" onClick={handleSignOut} className="flex justify-center">
               <LogOut className="h-4 w-4 mr-2" />
               Salir
             </Button>
