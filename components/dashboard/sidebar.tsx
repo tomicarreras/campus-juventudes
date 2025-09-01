@@ -29,17 +29,18 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
     { id: "exportar", label: "Exportar Planillas", icon: FileSpreadsheet },
   ]
 
+  // cerrar con Escape
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false)
     }
     document.addEventListener("keydown", onKey)
     return () => document.removeEventListener("keydown", onKey)
   }, [])
 
+  // bloquear scroll SOLO cuando el drawer está abierto
   useEffect(() => {
-    if (open) document.body.style.overflow = "hidden"
-    else document.body.style.overflow = ""
+    document.body.style.overflow = open ? "hidden" : ""
     return () => {
       document.body.style.overflow = ""
     }
@@ -78,10 +79,13 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
       </div>
 
-      {/* ------------------ MOBILE (botón FIXED abajo del navbar) ------------------ */}
+      {/* ------------------ MOBILE (FIXED, no altera layout) ------------------ */}
       <div className="md:hidden">
-        {/* Barra FIXED en top pero desplazada para quedar *debajo* del navbar: top-16 */}
-        <div className="fixed top-16 left-0 right-0 z-50 bg-white border-b">
+        {/* Botón FIXED centrado, ABAJO DEL NAVBAR -> top-16 (ajustalo si tu navbar tiene otra altura) */}
+        <div
+          className="fixed left-0 right-0 z-50"
+          style={{ top: "4rem" /* 16 * 4px = 64px; cambiá si tu navbar no es h-16 */ }}
+        >
           <div className="max-w-7xl mx-auto px-4">
             <div className="w-full flex justify-center">
               <button
@@ -97,60 +101,64 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
           </div>
         </div>
 
-        {/* Spacer para que el contenido debajo no quede tapado por la barra fixed */}
-        <div className="h-16" />
+        {/* -------------------------------------------
+            RENDERIZADO CONDICIONAL: overlay + drawer
+            Solo aparecen cuando open === true
+           ------------------------------------------- */}
+        {open && (
+          <>
+            {/* Overlay (fixed, ocupa todo el area debajo del navbar) */}
+            <div
+              className="fixed left-0 right-0 bottom-0 z-40"
+              style={{ top: "4rem", backgroundColor: "rgba(0,0,0,0.45)" }}
+              onClick={() => setOpen(false)}
+            />
 
-        {/* Overlay: comienza en top-16 para no tapar el navbar */}
-        <div
-          className={`fixed left-0 right-0 top-16 bottom-0 z-40 transition-opacity ${
-            open ? "opacity-60 pointer-events-auto" : "opacity-0 pointer-events-none"
-          }`}
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-          onClick={() => setOpen(false)}
-        />
+            {/* Drawer (fixed, starts at same top to appear under the "Menu" button) */}
+            <div
+              role="dialog"
+              aria-modal="true"
+              className="fixed left-0 right-0 z-50"
+              style={{ top: "4rem" }}
+            >
+              <div className="bg-white border-b shadow-md">
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="font-medium">Menu</span>
+                  <button
+                    onClick={() => setOpen(false)}
+                    aria-label="Cerrar menú"
+                    className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
 
-        {/* Drawer desde debajo del botón (también desplazado top-16) */}
-        <div
-          role="dialog"
-          aria-modal="true"
-          className={`fixed left-0 right-0 z-50 transform transition-transform ${open ? "translate-y-0" : "-translate-y-full"} top-16`}
-        >
-          <div className="bg-white border-b shadow-md">
-            <div className="flex items-center justify-between px-4 py-3">
-              <span className="font-medium">Menu</span>
-              <button
-                onClick={() => setOpen(false)}
-                aria-label="Cerrar menú"
-                className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-2"
-              >
-                <X className="h-5 w-5" />
-              </button>
+                <div className="px-4 pb-6 space-y-2">
+                  <Button
+                    onClick={() => handleNavigate("crear-grupo")}
+                    className="w-full justify-start"
+                    variant={activeSection === "crear-grupo" ? "default" : "ghost"}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Crear Grupo
+                  </Button>
+
+                  {menuItems.map((item) => (
+                    <Button
+                      key={item.id}
+                      onClick={() => handleNavigate(item.id)}
+                      variant={activeSection === item.id ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <item.icon className="h-4 w-4 mr-2" />
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
-
-            <div className="px-4 pb-6 space-y-2">
-              <Button
-                onClick={() => handleNavigate("crear-grupo")}
-                className="w-full justify-start"
-                variant={activeSection === "crear-grupo" ? "default" : "ghost"}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Crear Grupo
-              </Button>
-
-              {menuItems.map((item) => (
-                <Button
-                  key={item.id}
-                  onClick={() => handleNavigate(item.id)}
-                  variant={activeSection === item.id ? "default" : "ghost"}
-                  className="w-full justify-start"
-                >
-                  <item.icon className="h-4 w-4 mr-2" />
-                  {item.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </>
   )
