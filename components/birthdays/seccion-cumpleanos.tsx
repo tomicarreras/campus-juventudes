@@ -161,9 +161,9 @@ export default function SeccionCumpleanos() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-pink-700">
               <Cake className="h-5 w-5" />
-              ¡Cumpleaños de Hoy!
+              ¡Estamos de festejo!
             </CardTitle>
-            <CardDescription>Estudiantes que cumplen años hoy</CardDescription>
+            <CardDescription>Estudiante/s que cumple/n años hoy</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
