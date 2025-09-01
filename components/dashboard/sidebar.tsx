@@ -29,7 +29,6 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
     { id: "exportar", label: "Exportar Planillas", icon: FileSpreadsheet },
   ]
 
-  // cerrar con Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false)
@@ -38,7 +37,6 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
     return () => document.removeEventListener("keydown", onKey)
   }, [])
 
-  // bloquear scroll SOLO cuando el drawer está abierto
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : ""
     return () => {
@@ -53,7 +51,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
 
   return (
     <>
-      {/* ------------------ DESKTOP (sin cambios) ------------------ */}
+      {/* DESKTOP: sin cambios */}
       <div className="hidden md:block w-64 bg-gray-50 border-r min-h-screen p-4">
         <div className="space-y-2">
           <Button
@@ -79,13 +77,13 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
       </div>
 
-      {/* ------------------ MOBILE (FIXED, no altera layout) ------------------ */}
+      {/* MOBILE */}
       <div className="md:hidden">
-        {/* Botón FIXED centrado, ABAJO DEL NAVBAR -> top-16 (ajustalo si tu navbar tiene otra altura) */}
-        <div
-          className="fixed left-0 right-0 z-50"
-          style={{ top: "4rem" /* 16 * 4px = 64px; cambiá si tu navbar no es h-16 */ }}
-        >
+        {/* Spacer para que el botón quede *debajo* del navbar fijo (ajustar si tu navbar no es h-16) */}
+        <div className="h-16" />
+
+        {/* Botón centrado en el flujo (NO fixed) -> se desplaza al scrollear */}
+        <div className="w-full border-b bg-white">
           <div className="max-w-7xl mx-auto px-4">
             <div className="w-full flex justify-center">
               <button
@@ -101,20 +99,17 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
           </div>
         </div>
 
-        {/* -------------------------------------------
-            RENDERIZADO CONDICIONAL: overlay + drawer
-            Solo aparecen cuando open === true
-           ------------------------------------------- */}
+        {/* RENDERIZADO CONDICIONAL: overlay + drawer solo cuando open === true */}
         {open && (
           <>
-            {/* Overlay (fixed, ocupa todo el area debajo del navbar) */}
+            {/* Overlay (fixed) que empieza debajo del navbar */}
             <div
               className="fixed left-0 right-0 bottom-0 z-40"
               style={{ top: "4rem", backgroundColor: "rgba(0,0,0,0.45)" }}
               onClick={() => setOpen(false)}
             />
 
-            {/* Drawer (fixed, starts at same top to appear under the "Menu" button) */}
+            {/* Drawer (fixed) que aparece debajo del navbar */}
             <div
               role="dialog"
               aria-modal="true"
