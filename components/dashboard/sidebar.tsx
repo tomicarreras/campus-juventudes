@@ -52,7 +52,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
 
   return (
     <>
-      {/* --- DESKTOP: exacto al que tenías --- */}
+      {/* DESKTOP: exacto al que tenías */}
       <div className="hidden md:block w-64 bg-gray-50 border-r min-h-screen p-4">
         <div className="space-y-2">
           <Button
@@ -78,40 +78,43 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
       </div>
 
-      {/* --- MOBILE TOPBAR minimal: solo HAMBURGER + "Menu" (sin logo) --- */}
-      <header className="md:hidden w-full bg-white border-b">
-        <div className="w-full px-4 py-2 flex items-center">
-          {/* Botón hamburguesa + texto "Menu" a la izquierda. Nada a la derecha para que el contenido tenga todo el ancho. */}
-          <button
-            onClick={() => setOpen(true)}
-            aria-label="Abrir menú"
-            className="flex items-center gap-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
-          >
-            <Menu className="h-5 w-5" />
-            <span>Menu</span>
-          </button>
+      {/* MOBILE: botón centrado (sin logo), todo el ancho disponible para contenido */}
+      <div className="md:hidden">
+        <div className="w-full border-b bg-white sticky top-0 z-50">
+          {/* Flex padre que CENTRA su hijo */}
+          <div className="w-full flex justify-center">
+            {/* Botón nativo para evitar estilos inesperados del componente Button */}
+            <button
+              onClick={() => setOpen(true)}
+              aria-label="Abrir menú"
+              className="max-w-xs w-full flex items-center justify-center gap-2 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
+            >
+              <Menu className="h-5 w-5" />
+              <span>Menu</span>
+            </button>
+          </div>
         </div>
 
         {/* Overlay */}
         <div
-          className={`fixed inset-0 z-40 transition-opacity ${open ? "opacity-60 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+          className={`fixed inset-0 z-40 transition-opacity ${
+            open ? "opacity-60 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           onClick={() => setOpen(false)}
         />
 
-        {/* Drawer: ocupa todo el ancho y aparece desde arriba; al abrir deja el contenido debajo intacto */}
+        {/* Drawer desde arriba (full width) */}
         <div
           role="dialog"
           aria-modal="true"
-          className={`fixed top-0 left-0 right-0 z-50 transform transition-transform ${open ? "translate-y-0" : "-translate-y-full"}`}
+          className={`fixed top-0 left-0 right-0 z-50 transform transition-transform ${
+            open ? "translate-y-0" : "-translate-y-full"
+          }`}
         >
           <div className="bg-white border-b shadow-md">
             <div className="flex items-center justify-between px-4 py-3">
-              <div className="flex items-center gap-3">
-                <Menu className="h-5 w-5" />
-                <span className="font-medium">Menu</span>
-              </div>
-
+              <span className="font-medium">Menu</span>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Cerrar menú"
@@ -145,7 +148,7 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
             </div>
           </div>
         </div>
-      </header>
+      </div>
     </>
   )
 }
