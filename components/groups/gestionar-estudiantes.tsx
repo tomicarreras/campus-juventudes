@@ -22,6 +22,14 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
+  const parseLocalDate = (dateStr: string) => {
+    // Acepta formatos "YYYY-MM-DD" o "YYYY-MM-DDTHH:MM:SS..." y devuelve un Date en zona local con la fecha correcta.
+    if (!dateStr) return new Date(NaN)
+    const dateOnly = dateStr.split("T")[0]
+    const [year, month, day] = dateOnly.split("-").map((n) => Number(n))
+    return new Date(year, month - 1, day)
+  }
+
   const loadStudents = async () => {
     try {
       const { data, error } = await supabase.from("students").select("*").eq("group_id", group.id).order("full_name")
@@ -44,10 +52,12 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
     setSuccess(null)
 
     const formData = new FormData(e.currentTarget)
-    const email = formData.get("email") as string
-    const fullName = formData.get("fullName") as string
-    const nationalId = formData.get("nationalId") as string
-    const birthDate = formData.get("birthDate") as string
+    const emailRaw = (formData.get("email") as string) || ""
+    const email = emailRaw.trim() ? emailRaw.trim() : null // Opcional: si está vacío, guardamos null
+    const fullName = (formData.get("fullName") as string).trim()
+    const nationalId = (formData.get("nationalId") as string).trim()
+    const birthDateRaw = (formData.get("birthDate") as string) || ""
+    const birthDate = birthDateRaw.trim() ? birthDateRaw.trim() : null // mantener formato "YYYY-MM-DD" o null
 
     try {
       const { error: insertError } = await supabase.from("students").insert([
@@ -135,14 +145,13 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
 
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
-                  Email *
+                  Email (opcional)
                 </label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   placeholder="estudiante@ejemplo.com"
-                  required
                   disabled={loading}
                 />
               </div>
@@ -198,10 +207,10 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
                   <div>
                     <h4 className="font-medium">{student.full_name}</h4>
                     <div className="flex gap-4 text-sm text-gray-600">
-                      <span>{student.email}</span>
+                      <span>{student.email ?? ""}</span>
                       <span>DNI: {student.national_id}</span>
                       {student.birth_date && (
-                        <span>Nació: {new Date(student.birth_date).toLocaleDateString("es-AR")}</span>
+                        <span>Nació: {parseLocalDate(student.birth_date).toLocaleDateString("es-AR")}</span>
                       )}
                     </div>
                   </div>
