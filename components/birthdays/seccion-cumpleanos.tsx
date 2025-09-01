@@ -23,44 +23,39 @@ export default function SeccionCumpleanos() {
   const [todayBirthdays, setTodayBirthdays] = useState<StudentBirthday[]>([])
   const [loading, setLoading] = useState(true)
 
-  // --- Funciones de cálculo ---
   const calculateDaysUntilBirthday = (birthDate: string) => {
     const today = new Date()
-    today.setHours(0, 0, 0, 0) // Resetea hora para evitar desfases por zona horaria
-
-    const birth = new Date(birthDate + "T00:00:00") // Forzar hora 00:00
+    const birth = new Date(birthDate)
     const currentYear = today.getFullYear()
 
+    // Set birthday to current year
     let nextBirthday = new Date(currentYear, birth.getMonth(), birth.getDate())
 
+    // If birthday already passed this year, set to next year
     if (nextBirthday < today) {
       nextBirthday = new Date(currentYear + 1, birth.getMonth(), birth.getDate())
     }
 
     const diffTime = nextBirthday.getTime() - today.getTime()
-    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) // Redondea correctamente
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
     return diffDays
   }
 
   const calculateAge = (birthDate: string) => {
     const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    const birth = new Date(birthDate + "T00:00:00")
-
+    const birth = new Date(birthDate)
     let age = today.getFullYear() - birth.getFullYear()
 
+    // Check if birthday hasn't occurred this year yet
     const monthDiff = today.getMonth() - birth.getMonth()
-    const dayDiff = today.getDate() - birth.getDate()
-    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       age--
     }
 
-    return age + 1
+    return age + 1 // Age they will turn
   }
 
-  // --- Cargar cumpleaños ---
   const loadBirthdays = async () => {
     try {
       const { user } = await getCurrentUser()
@@ -75,7 +70,7 @@ export default function SeccionCumpleanos() {
           email,
           birth_date,
           groups!inner(name, teacher_id)
-        `
+        `,
         )
         .eq("groups.teacher_id", user.id)
         .not("birth_date", "is", null)
@@ -98,9 +93,10 @@ export default function SeccionCumpleanos() {
               age_turning: calculateAge(student.birth_date),
             }
           })
-          .filter((student) => student.days_until_birthday <= 90)
+          .filter((student) => student.days_until_birthday <= 90) // Show next 3 months
           .sort((a, b) => a.days_until_birthday - b.days_until_birthday) || []
 
+      // Separate today's birthdays from upcoming ones
       const today = studentsWithBirthdays.filter((s) => s.days_until_birthday === 0)
       const upcoming = studentsWithBirthdays.filter((s) => s.days_until_birthday > 0)
 
@@ -117,9 +113,8 @@ export default function SeccionCumpleanos() {
     loadBirthdays()
   }, [])
 
-  // --- Helpers UI ---
   const formatBirthDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00")
+    const date = new Date(dateStr)
     return date.toLocaleDateString("es-AR", {
       day: "numeric",
       month: "long",
@@ -129,6 +124,7 @@ export default function SeccionCumpleanos() {
   const getDaysText = (days: number) => {
     if (days === 0) return "¡Hoy!"
     if (days === 1) return "Mañana"
+    if (days <= 7) return `En ${days} días`
     if (days <= 30) return `En ${days} días`
     return `En ${Math.ceil(days / 7)} semanas`
   }
@@ -137,7 +133,6 @@ export default function SeccionCumpleanos() {
     return <div className="text-center py-8">Cargando cumpleaños...</div>
   }
 
-  // --- Render ---
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-6">
@@ -145,7 +140,7 @@ export default function SeccionCumpleanos() {
         <h2 className="text-2xl font-bold">Próximos Cumpleaños</h2>
       </div>
 
-      {/* Hoy */}
+      {/* Today's Birthdays */}
       {todayBirthdays.length > 0 && (
         <Card className="border-pink-200 bg-gradient-to-r from-pink-50 to-purple-50">
           <CardHeader>
@@ -183,7 +178,7 @@ export default function SeccionCumpleanos() {
         </Card>
       )}
 
-      {/* Próximos */}
+      {/* Upcoming Birthdays */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -239,7 +234,7 @@ export default function SeccionCumpleanos() {
         </CardContent>
       </Card>
 
-      {/* Estadísticas */}
+      {/* Statistics */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
