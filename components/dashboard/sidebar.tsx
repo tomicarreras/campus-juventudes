@@ -79,19 +79,19 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
       </div>
 
-      {/* ------------------ MOBILE (FIXED, no altera layout) ------------------ */}
+      {/* ------------------ MOBILE (STICKY en lugar de fixed) ------------------ */}
       <div className="md:hidden">
-        {/* Botón FIXED centrado, ABAJO DEL NAVBAR -> top-16 (ajustalo si tu navbar tiene otra altura) */}
+        {/* Botón STICKY centrado, debajo del navbar */}
         <div
-          className="fixed left-0 right-0 z-50"
-          style={{ top: "4rem" /* 16 * 4px = 64px; cambiá si tu navbar no es h-16 */ }}
+          className="sticky left-0 right-0 z-30"
+          style={{ top: "4rem" /* ajustá si tu navbar no es h-16 */ }}
         >
           <div className="max-w-7xl mx-auto px-4">
             <div className="w-full flex justify-center">
               <button
                 onClick={() => setOpen(true)}
                 aria-label="Abrir menú"
-                className="max-w-xs w-full flex items-center justify-center gap-2 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
+                className="max-w-xs w-full flex items-center justify-center gap-2 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded bg-white border shadow-sm"
                 style={{ maxWidth: 240 }}
               >
                 <Menu className="h-5 w-5" />
@@ -101,20 +101,15 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
           </div>
         </div>
 
-        {/* -------------------------------------------
-            RENDERIZADO CONDICIONAL: overlay + drawer
-            Solo aparecen cuando open === true
-           ------------------------------------------- */}
+        {/* Overlay + Drawer */}
         {open && (
           <>
-            {/* Overlay (fixed, ocupa todo el area debajo del navbar) */}
             <div
               className="fixed left-0 right-0 bottom-0 z-40"
               style={{ top: "4rem", backgroundColor: "rgba(0,0,0,0.45)" }}
               onClick={() => setOpen(false)}
             />
 
-            {/* Drawer (fixed, starts at same top to appear under the "Menu" button) */}
             <div
               role="dialog"
               aria-modal="true"
