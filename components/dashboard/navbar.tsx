@@ -32,39 +32,37 @@ export default function Navbar() {
   }
 
   return (
-  <nav className="bg-white shadow-sm border-b">
-    <div className="w-full px-4 sm:px-6 lg:px-8">
-      {/* Navegación Desktop */}
-      <div className="hidden md:flex justify-between items-center h-16">
-        <div className="flex items-center">
-          <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
+    <nav className="bg-white shadow-sm border-b">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        {/* --- DESKTOP / TABLET: exactamente tu layout original --- */}
+        <div className="hidden md:flex justify-between items-center h-16">
+          <div className="flex items-center">
+            <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
+          </div>
+          <div className="flex items-center space-x-4">
+            <span className="text-sm text-gray-600">Hola, {user?.full_name || "Profesor"}</span>
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Salir
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">Hola, {user?.full_name || "Profesor"}</span>
-          {/* Botón Salir Desktop */}
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Salir
-          </Button>
-        </div>
-      </div>
 
-      {/* Navegación Mobile */}
-      <div className="md:hidden flex flex-col py-3">
-        <div className="flex items-center">
-          <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
-          <span className="ml-3 text-sm text-gray-600">Hola, {user?.full_name || "Profesor"}</span>
+        {/* --- MOBILE: logo + saludo en una línea, botón Salir en fila separada alineado a la derecha --- */}
+        <div className="md:hidden flex flex-col py-3">
+          <div className="flex items-center">
+            <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
+            <span className="ml-3 text-sm text-gray-600">Hola, {user?.full_name || "Profesor"}</span>
+          </div>
+
+          <div className="mt-3 flex justify-end">
+            <Button variant="outline" size="sm" onClick={handleSignOut} className="flex items-center">
+              <LogOut className="h-4 w-4 mr-2" />
+              Salir
+            </Button>
+          </div>
         </div>
-        {/* El botón Salir mobile ya NO estaría aquí si tuviera position:fixed */}
       </div>
-    </div>
-    {/* Aquí podría ir el botón Salir Mobile, fuera del flex del navbar */}
-    <div className="md:hidden fixed left-0 right-0 z-50 top-4rem ..."> {/* Ajustar estilos si es necesario */}
-        <Button variant="outline" size="sm" onClick={handleSignOut} className="flex items-center">
-            <LogOut className="h-4 w-4 mr-2" />
-            Salir
-        </Button>
-    </div>
-  </nav>
-)
+    </nav>
+  )
 }
