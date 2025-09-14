@@ -1,5 +1,3 @@
-// dashboard-client.tsx
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -125,9 +123,9 @@ export default function DashboardClient({ user }: DashboardClientProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 flex-col">
+    <div className="min-h-screen bg-gray-50">
       <Navbar user={user} />
-      <div className="flex flex-1">
+      <div className="flex">
         <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
         <main className="flex-1 p-6">{renderContent()}</main>
       </div>
