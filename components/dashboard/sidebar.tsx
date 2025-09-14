@@ -79,15 +79,16 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
       </div>
 
-      {/* ------------------ MOBILE (STICKY en lugar de fixed) ------------------ */}
+      {/* ------------------ MOBILE (botón en flujo normal, centrado y alineado con el navbar) ------------------ */}
       <div className="md:hidden">
-        {/* Botón STICKY centrado, debajo del navbar */}
-        <div
-          className="sticky left-0 right-0 z-30"
-          style={{ top: "4rem" /* ajustá si tu navbar no es h-16 */ }}
-        >
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="w-full flex justify-center">
+        {/* IMPORTANT: este componente debe renderizarse justo DESPUÉS del <Navbar /> en el layout.
+            Así el botón quedará exactamente debajo del logo y no 'acompañará' el scroll.
+
+            Uso las mismas clases de padding horizontal que el navbar para que queden alineados:
+        */}
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="w-full flex justify-center py-3">
               <button
                 onClick={() => setOpen(true)}
                 aria-label="Abrir menú"
@@ -101,15 +102,20 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
           </div>
         </div>
 
-        {/* Overlay + Drawer */}
+        {/* -------------------------------------------
+            RENDERIZADO CONDICIONAL: overlay + drawer
+            Solo aparecen cuando open === true
+           ------------------------------------------- */}
         {open && (
           <>
+            {/* Overlay (fixed, ocupa todo el area debajo del navbar) */}
             <div
               className="fixed left-0 right-0 bottom-0 z-40"
               style={{ top: "4rem", backgroundColor: "rgba(0,0,0,0.45)" }}
               onClick={() => setOpen(false)}
             />
 
+            {/* Drawer (fixed, starts at same top to appear under the "Menu" button) */}
             <div
               role="dialog"
               aria-modal="true"
