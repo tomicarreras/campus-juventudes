@@ -123,12 +123,12 @@ export default function DashboardClient({ user }: DashboardClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar user={user} />
-      <div className="flex">
-        <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-        <main className="flex-1 p-6">{renderContent()}</main>
-      </div>
+  <div className="min-h-screen bg-gray-50">
+    <Navbar user={user} />
+    <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+    <div className="flex">
+      <main className="flex-1 p-6">{renderContent()}</main>
     </div>
-  )
+  </div>
+)
 }
