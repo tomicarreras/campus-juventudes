@@ -79,20 +79,19 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
         </div>
       </div>
 
-      {/* ------------------ MOBILE (botón en flujo normal, centrado y alineado con el navbar) ------------------ */}
+      {/* ------------------ MOBILE (FIXED, no altera layout) ------------------ */}
       <div className="md:hidden">
-        {/* IMPORTANT: este componente debe renderizarse justo DESPUÉS del <Navbar /> en el layout.
-            Así el botón quedará exactamente debajo del logo y no 'acompañará' el scroll.
-
-            Uso las mismas clases de padding horizontal que el navbar para que queden alineados:
-        */}
-        <div className="w-full px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="w-full flex justify-center py-3">
+        {/* Botón FIXED centrado, ABAJO DEL NAVBAR -> top-16 (ajustalo si tu navbar tiene otra altura) */}
+        <div
+          className="fixed left-0 right-0 z-50"
+          style={{ top: "4rem" /* 16 * 4px = 64px; cambiá si tu navbar no es h-16 */ }}
+        >
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="w-full flex justify-center">
               <button
                 onClick={() => setOpen(true)}
                 aria-label="Abrir menú"
-                className="max-w-xs w-full flex items-center justify-center gap-2 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded bg-white border shadow-sm"
+                className="max-w-xs w-full flex items-center justify-center gap-2 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
                 style={{ maxWidth: 240 }}
               >
                 <Menu className="h-5 w-5" />
