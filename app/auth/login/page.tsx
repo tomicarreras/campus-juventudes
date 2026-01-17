@@ -29,7 +29,7 @@ export default function LoginPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div>Loading...</div>
+        <div>Cargando...</div>
       </div>
     )
   }

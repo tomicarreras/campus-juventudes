@@ -132,7 +132,7 @@ export default function SeccionCumpleanos() {
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-6">
         <Gift className="h-6 w-6 text-pink-600" />
-        <h2 className="text-2xl font-bold">Próximos Cumpleaños</h2>
+        <h2 className="text-2xl font-bold">Próximos cumpleaños</h2>
       </div>
 
       {/* Today's Birthdays */}
@@ -141,7 +141,7 @@ export default function SeccionCumpleanos() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-pink-700">
               <Cake className="h-5 w-5" />
-              ¡Cumpleaños de Hoy!
+              ¡Estamos de festejo!
             </CardTitle>
             <CardDescription>Estudiantes que cumplen años hoy</CardDescription>
           </CardHeader>
@@ -178,7 +178,7 @@ export default function SeccionCumpleanos() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Próximos Cumpleaños
+            Próximos cumpleaños
           </CardTitle>
           <CardDescription>Cumpleaños en los próximos 3 meses</CardDescription>
         </CardHeader>
