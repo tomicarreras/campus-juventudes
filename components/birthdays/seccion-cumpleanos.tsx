@@ -93,6 +93,19 @@ export default function SeccionCumpleanos() {
 
   useEffect(() => {
     loadBirthdays()
+    
+    // Recalculate at midnight to update "today's birthdays"
+    const now = new Date()
+    const tomorrow = new Date(now)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+    
+    const timeUntilMidnight = tomorrow.getTime() - now.getTime()
+    const timer = setTimeout(() => {
+      loadBirthdays()
+    }, timeUntilMidnight)
+    
+    return () => clearTimeout(timer)
   }, [])
 
   const formatBirthDate = (dateStr: string) => {

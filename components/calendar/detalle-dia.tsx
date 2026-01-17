@@ -99,7 +99,10 @@ export default function DetalleDia({ date, groupId, onBack }: DetalleDiaProps) {
         <div>
           <h2 className="text-2xl font-bold">Detalle de Asistencia</h2>
           <p className="text-gray-600">
-            {group.name} - {new Date(date).toLocaleDateString("es-AR")}
+            {group.name} - {(() => {
+              const [year, month, day] = date.split("-")
+              return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString("es-AR")
+            })()}
           </p>
         </div>
       </div>
@@ -113,12 +116,15 @@ export default function DetalleDia({ date, groupId, onBack }: DetalleDiaProps) {
           </CardTitle>
           <CardDescription>
             {group.place} - {group.schedule_time && `${group.schedule_time} - `}
-            {new Date(date).toLocaleDateString("es-AR", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
+            {(() => {
+              const [year, month, day] = date.split("-")
+              return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString("es-AR", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            })()}
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -28,9 +28,12 @@ export function parseDateString(dateStr: string): Date {
  */
 export function isBirthdayToday(birthDateStr: string): boolean {
   const today = new Date()
-  const birthDate = parseDateString(birthDateStr)
-
-  return today.getMonth() === birthDate.getMonth() && today.getDate() === birthDate.getDate()
+  const todayMonth = today.getMonth() + 1
+  const todayDay = today.getDate()
+  
+  const [year, month, day] = birthDateStr.split("-").map(Number)
+  
+  return todayMonth === month && todayDay === day
 }
 
 /**
@@ -39,19 +42,22 @@ export function isBirthdayToday(birthDateStr: string): boolean {
  */
 export function daysUntilBirthday(birthDateStr: string): number {
   const today = new Date()
-  const birthDate = parseDateString(birthDateStr)
   const currentYear = today.getFullYear()
-
-  // Set birthday to current year
-  let nextBirthday = new Date(currentYear, birthDate.getMonth(), birthDate.getDate())
-
-  // If birthday already passed this year, set to next year
-  if (nextBirthday < today) {
-    nextBirthday = new Date(currentYear + 1, birthDate.getMonth(), birthDate.getDate())
-  }
-
-  const diffTime = nextBirthday.getTime() - today.getTime()
+  const currentMonth = today.getMonth() + 1
+  const currentDay = today.getDate()
+  
+  const [year, month, day] = birthDateStr.split("-").map(Number)
+  
+  // Check if birthday has occurred this year
+  const hasOccurred = month < currentMonth || (month === currentMonth && day < currentDay)
+  
+  // Calculate target birthday
+  const targetYear = hasOccurred ? currentYear + 1 : currentYear
+  const targetDate = new Date(targetYear, month - 1, day)
+  const today2 = new Date(currentYear, currentMonth - 1, currentDay)
+  
+  const diffTime = targetDate.getTime() - today2.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
+  
   return diffDays
 }
