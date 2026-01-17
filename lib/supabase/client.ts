@@ -12,11 +12,13 @@ export const isSupabaseConfigured =
   typeof supabaseAnonKey === "string" &&
   supabaseAnonKey.length > 0
 
-if (!isSupabaseConfigured) {
-  throw new Error("Missing Supabase environment variables")
+// Create a singleton instance of the Supabase client for Client Components
+let supabaseInstance: ReturnType<typeof createSupabaseClient> | null = null
+
+if (isSupabaseConfigured) {
+  supabaseInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey)
 }
 
-// Create a singleton instance of the Supabase client for Client Components
-export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey)
+export const supabase = supabaseInstance as ReturnType<typeof createSupabaseClient>
 
 export const createClient = () => supabase
