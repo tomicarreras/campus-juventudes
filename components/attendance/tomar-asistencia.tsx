@@ -141,14 +141,14 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={onBack}>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-6">
+        <Button variant="outline" onClick={onBack} className="w-full sm:w-auto">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Volver
         </Button>
-        <div>
-          <h2 className="text-2xl font-bold">{group.name}</h2>
-          <p className="text-gray-600">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold truncate">{group.name}</h2>
+          <p className="text-xs sm:text-sm text-gray-600 truncate">
             {group.place} - {new Date(group.schedule_date).toLocaleDateString("es-AR")}
           </p>
         </div>
@@ -156,28 +156,28 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Calendar className="h-5 w-5" />
             Tomar Asistencia
           </CardTitle>
-          <CardDescription>Seleccioná la fecha y marcá la asistencia de cada estudiante.</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">Seleccioná la fecha y marcá la asistencia de cada estudiante.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {error && (
             <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription className="text-xs sm:text-sm">{error}</AlertDescription>
             </Alert>
           )}
 
           {success && (
             <Alert className="border-green-200 bg-green-50">
-              <AlertDescription className="text-green-800">{success}</AlertDescription>
+              <AlertDescription className="text-green-800 text-xs sm:text-sm">{success}</AlertDescription>
             </Alert>
           )}
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
             <div className="space-y-2">
-              <label htmlFor="attendanceDate" className="text-sm font-medium">
+              <label htmlFor="attendanceDate" className="text-xs sm:text-sm font-medium block">
                 Fecha de Asistencia
               </label>
               <Input
@@ -185,19 +185,19 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
                 type="date"
                 value={attendanceDate}
                 onChange={(e) => setAttendanceDate(e.target.value)}
-                className="w-auto"
+                className="text-xs sm:text-sm"
               />
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Users className="h-4 w-4" />
-              <span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 px-3 py-2 bg-gray-50 rounded">
+              <Users className="h-4 w-4 flex-shrink-0" />
+              <span className="whitespace-nowrap">
                 Presentes: {presentCount} / {totalCount}
               </span>
             </div>
           </div>
 
           {existingAttendance.length > 0 && (
-            <Alert>
+            <Alert className="text-xs sm:text-sm">
               <AlertDescription>
                 Ya existe asistencia registrada para esta fecha. Los cambios sobrescribirán los datos anteriores.
               </AlertDescription>
@@ -208,17 +208,17 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
 
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Estudiantes</CardTitle>
+          <CardTitle className="text-base sm:text-lg">Lista de Estudiantes</CardTitle>
         </CardHeader>
         <CardContent>
           {students.length === 0 ? (
-            <p className="text-center text-gray-600 py-8">No hay estudiantes en este grupo.</p>
+            <p className="text-center text-gray-600 py-8 text-sm sm:text-base">No hay estudiantes en este grupo.</p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {attendanceRecords.map((record) => (
-                <div key={record.student.id} className="border rounded-lg p-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex items-center space-x-2 pt-1">
+                <div key={record.student.id} className="border rounded-lg p-3 sm:p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+                    <div className="flex items-center space-x-2">
                       <Checkbox
                         id={`present-${record.student.id}`}
                         checked={record.present}
@@ -226,24 +226,24 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
                       />
                       <label
                         htmlFor={`present-${record.student.id}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-xs sm:text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 whitespace-nowrap"
                       >
                         Presente
                       </label>
                     </div>
 
-                    <div className="flex-1">
-                      <h4 className="font-medium">{record.student.full_name}</h4>
-                      <div className="flex gap-4 text-sm text-gray-600 mb-2">
-                        <span>{record.student.email}</span>
-                        <span>DNI: {record.student.national_id}</span>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm sm:text-base truncate">{record.student.full_name}</h4>
+                      <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-2">
+                        <span className="truncate">{record.student.email}</span>
+                        <span className="truncate">DNI: {record.student.national_id}</span>
                       </div>
 
                       <Textarea
                         placeholder="Notas opcionales..."
                         value={record.notes}
                         onChange={(e) => handleNotesChange(record.student.id, e.target.value)}
-                        className="mt-2"
+                        className="mt-2 text-xs sm:text-sm"
                         rows={2}
                       />
                     </div>
@@ -251,7 +251,7 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
                 </div>
               ))}
 
-              <Button onClick={handleSaveAttendance} disabled={loading} className="w-full">
+              <Button onClick={handleSaveAttendance} disabled={loading} className="w-full text-sm sm:text-base">
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

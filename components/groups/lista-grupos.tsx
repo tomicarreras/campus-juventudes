@@ -58,24 +58,48 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
     )
   }
 
-  if (loading) return <div>Cargando grupos...</div>
+  if (loading) return <div className="text-center py-8">Cargando grupos...</div>
 
   return (
-    <div>
-      {grupos.map(group => (
-        <div key={group.id} className="flex items-center gap-2 mb-2">
-          <span
-            className="cursor-pointer hover:underline"
-            onClick={() => onSelectGroup && onSelectGroup(group)}
-          >
-            {group.name} - {group.place}
-          </span>
-          <Button size="sm" onClick={() => setEditingGroup(group)}>Editar</Button>
-          <Button size="sm" variant="destructive" onClick={() => handleDelete(group.id)} disabled={deleting}>
-            {deleting ? "Borrando..." : "Borrar"}
-          </Button>
+    <div className="space-y-3">
+      {grupos.length === 0 ? (
+        <div className="text-center text-gray-600 py-8">
+          No hay grupos creados aún. ¡Crea el primero!
         </div>
-      ))}
+      ) : (
+        grupos.map(group => (
+          <div 
+            key={group.id} 
+            className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition"
+          >
+            <div 
+              className="flex-1 cursor-pointer hover:underline min-w-0"
+              onClick={() => onSelectGroup && onSelectGroup(group)}
+            >
+              <h3 className="font-semibold text-sm sm:text-base truncate">{group.name}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 truncate">{group.place}</p>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <Button 
+                size="sm" 
+                onClick={() => setEditingGroup(group)}
+                className="flex-1 sm:flex-none text-xs sm:text-sm"
+              >
+                Editar
+              </Button>
+              <Button 
+                size="sm" 
+                variant="destructive" 
+                onClick={() => handleDelete(group.id)} 
+                disabled={deleting}
+                className="flex-1 sm:flex-none text-xs sm:text-sm"
+              >
+                {deleting ? "Borrando..." : "Borrar"}
+              </Button>
+            </div>
+          </div>
+        ))
+      )}
     </div>
   )
 }

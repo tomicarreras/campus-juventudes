@@ -1,26 +1,22 @@
 "use client"
-
-import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Users,
-  Calendar,
-  Gift,
-  Plus,
-  CalendarDays,
-  FileSpreadsheet,
-  Menu,
-  X,
-} from "lucide-react"
+import { Users, Calendar, Gift, Plus, CalendarDays, FileSpreadsheet } from "lucide-react"
 
 interface SidebarProps {
   activeSection: string
   onSectionChange: (section: string) => void
+  isOpen?: boolean
+  onClose?: () => void
+  isMobile?: boolean
 }
 
-export default function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
-  const [open, setOpen] = useState(false)
-
+export default function Sidebar({ 
+  activeSection, 
+  onSectionChange, 
+  isOpen = true,
+  onClose,
+  isMobile = false
+}: SidebarProps) {
   const menuItems = [
     { id: "grupos", label: "Mis Grupos", icon: Users },
     { id: "asistencia", label: "Asistencia", icon: Calendar },
@@ -29,137 +25,80 @@ export default function Sidebar({ activeSection, onSectionChange }: SidebarProps
     { id: "exportar", label: "Exportar Planillas", icon: FileSpreadsheet },
   ]
 
-  // cerrar con Escape
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false)
+  const handleItemClick = (sectionId: string) => {
+    onSectionChange(sectionId)
+    if (isMobile && onClose) {
+      onClose()
     }
-    document.addEventListener("keydown", onKey)
-    return () => document.removeEventListener("keydown", onKey)
-  }, [])
-
-  // bloquear scroll SOLO cuando el drawer está abierto
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : ""
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [open])
-
-  const handleNavigate = (id: string) => {
-    onSectionChange(id)
-    setOpen(false)
   }
 
-  return (
-    <>
-      {/* ------------------ DESKTOP (sin cambios) ------------------ */}
-      <div className="hidden md:block w-64 bg-gray-50 border-r min-h-screen p-4">
-        <div className="space-y-2">
-          <Button
-            onClick={() => onSectionChange("crear-grupo")}
-            className="w-full justify-start"
-            variant={activeSection === "crear-grupo" ? "default" : "ghost"}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Crear Grupo
-          </Button>
-
-          {menuItems.map((item) => (
-            <Button
-              key={item.id}
-              onClick={() => onSectionChange(item.id)}
-              variant={activeSection === item.id ? "default" : "ghost"}
-              className="w-full justify-start"
-            >
-              <item.icon className="h-4 w-4 mr-2" />
-              {item.label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* ------------------ MOBILE (FIXED, no altera layout) ------------------ */}
-      <div className="md:hidden">
-        {/* Botón FIXED centrado, ABAJO DEL NAVBAR -> top-16 (ajustalo si tu navbar tiene otra altura) */}
-        <div
-          className="fixed left-0 right-0 z-50"
-          style={{ top: "4rem" /* 16 * 4px = 64px; cambiá si tu navbar no es h-16 */ }}
+  // Mobile: Show as overlay
+  if (isMobile) {
+    return (
+      <>
+        {isOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 sm:hidden"
+            onClick={onClose}
+          />
+        )}
+        <div 
+          className={`fixed left-0 top-16 bottom-0 w-64 bg-white border-r shadow-lg transform transition-transform duration-300 z-40 sm:hidden overflow-y-auto ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         >
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="w-full flex justify-center">
-              <button
-                onClick={() => setOpen(true)}
-                aria-label="Abrir menú"
-                className="max-w-xs w-full flex items-center justify-center gap-2 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
-                style={{ maxWidth: 240 }}
+          <div className="p-4 space-y-2">
+            <Button
+              onClick={() => handleItemClick("crear-grupo")}
+              className="w-full justify-start text-left"
+              variant={activeSection === "crear-grupo" ? "default" : "ghost"}
+            >
+              <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+              <span className="truncate">Crear Grupo</span>
+            </Button>
+
+            {menuItems.map((item) => (
+              <Button
+                key={item.id}
+                onClick={() => handleItemClick(item.id)}
+                variant={activeSection === item.id ? "default" : "ghost"}
+                className="w-full justify-start text-left"
               >
-                <Menu className="h-5 w-5" />
-                <span>Menu</span>
-              </button>
-            </div>
+                <item.icon className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </Button>
+            ))}
           </div>
         </div>
+      </>
+    )
+  }
 
-        {/* -------------------------------------------
-            RENDERIZADO CONDICIONAL: overlay + drawer
-            Solo aparecen cuando open === true
-           ------------------------------------------- */}
-        {open && (
-          <>
-            {/* Overlay (fixed, ocupa todo el area debajo del navbar) */}
-            <div
-              className="fixed left-0 right-0 bottom-0 z-40"
-              style={{ top: "4rem", backgroundColor: "rgba(0,0,0,0.45)" }}
-              onClick={() => setOpen(false)}
-            />
+  // Desktop: Fixed sidebar
+  return (
+    <div className="hidden sm:block w-64 bg-gray-50 border-r p-4 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+      <div className="space-y-2">
+        <Button
+          onClick={() => onSectionChange("crear-grupo")}
+          className="w-full justify-start"
+          variant={activeSection === "crear-grupo" ? "default" : "ghost"}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Crear Grupo
+        </Button>
 
-            {/* Drawer (fixed, starts at same top to appear under the "Menu" button) */}
-            <div
-              role="dialog"
-              aria-modal="true"
-              className="fixed left-0 right-0 z-50"
-              style={{ top: "4rem" }}
-            >
-              <div className="bg-white border-b shadow-md">
-                <div className="flex items-center justify-between px-4 py-3">
-                  <span className="font-medium">Menu</span>
-                  <button
-                    onClick={() => setOpen(false)}
-                    aria-label="Cerrar menú"
-                    className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-2"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <div className="px-4 pb-6 space-y-2">
-                  <Button
-                    onClick={() => handleNavigate("crear-grupo")}
-                    className="w-full justify-start"
-                    variant={activeSection === "crear-grupo" ? "default" : "ghost"}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Crear Grupo
-                  </Button>
-
-                  {menuItems.map((item) => (
-                    <Button
-                      key={item.id}
-                      onClick={() => handleNavigate(item.id)}
-                      variant={activeSection === item.id ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <item.icon className="h-4 w-4 mr-2" />
-                      {item.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+        {menuItems.map((item) => (
+          <Button
+            key={item.id}
+            onClick={() => onSectionChange(item.id)}
+            variant={activeSection === item.id ? "default" : "ghost"}
+            className="w-full justify-start"
+          >
+            <item.icon className="h-4 w-4 mr-2" />
+            {item.label}
+          </Button>
+        ))}
       </div>
-    </>
+    </div>
   )
 }

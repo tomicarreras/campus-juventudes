@@ -7,8 +7,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, UserPlus, ArrowLeft, Trash2, Users } from "lucide-react"
+import { Loader2, UserPlus, ArrowLeft, Trash2, Users, Download, Upload, ArrowRight } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { supabase } from "@/lib/supabase/client"
+import { exportStudentsToCSV, parseStudentsFromCSV, validateStudentData } from "@/lib/student-utils"
 import type { Group, Student } from "@/lib/types"
 
 interface GestionarEstudiantesProps {
@@ -21,14 +29,12 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-
-  const parseLocalDate = (dateStr: string) => {
-    // Acepta formatos "YYYY-MM-DD" o "YYYY-MM-DDTHH:MM:SS..." y devuelve un Date en zona local con la fecha correcta.
-    if (!dateStr) return new Date(NaN)
-    const dateOnly = dateStr.split("T")[0]
-    const [year, month, day] = dateOnly.split("-").map((n) => Number(n))
-    return new Date(year, month - 1, day)
-  }
+  const [allGroups, setAllGroups] = useState<Group[]>([])
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importLoading, setImportLoading] = useState(false)
+  const [selectedStudentForMove, setSelectedStudentForMove] = useState<string | null>(null)
+  const [targetGroupForMove, setTargetGroupForMove] = useState<string | null>(null)
+  const [moveLoading, setMoveLoading] = useState(false)
 
   const loadStudents = async () => {
     try {
@@ -41,8 +47,20 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
     }
   }
 
+  const loadAllGroups = async () => {
+    try {
+      const { data, error } = await supabase.from("groups").select("*").order("name")
+
+      if (error) throw error
+      setAllGroups(data || [])
+    } catch (err: any) {
+      console.error("Error loading groups:", err)
+    }
+  }
+
   useEffect(() => {
     loadStudents()
+    loadAllGroups()
   }, [group.id])
 
   const handleAddStudent = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -52,12 +70,10 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
     setSuccess(null)
 
     const formData = new FormData(e.currentTarget)
-    const emailRaw = (formData.get("email") as string) || ""
-    const email = emailRaw.trim() ? emailRaw.trim() : null // Opcional: si está vacío, guardamos null
-    const fullName = (formData.get("fullName") as string).trim()
-    const nationalId = (formData.get("nationalId") as string).trim()
-    const birthDateRaw = (formData.get("birthDate") as string) || ""
-    const birthDate = birthDateRaw.trim() ? birthDateRaw.trim() : null // mantener formato "YYYY-MM-DD" o null
+    const email = formData.get("email") as string
+    const fullName = formData.get("fullName") as string
+    const nationalId = formData.get("nationalId") as string
+    const birthDate = formData.get("birthDate") as string
 
     try {
       const { error: insertError } = await supabase.from("students").insert([
@@ -97,6 +113,127 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
     }
   }
 
+  const handleExportStudents = () => {
+    if (students.length === 0) {
+      setError("No hay estudiantes para exportar")
+      return
+    }
+
+    try {
+      exportStudentsToCSV(students, group.name)
+      setSuccess(`Se exportaron ${students.length} estudiante(s)`)
+    } catch (err: any) {
+      setError(err.message)
+    }
+  }
+
+  const handleImportStudents = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!importFile) {
+      setError("Selecciona un archivo para importar")
+      return
+    }
+
+    setImportLoading(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const parsedStudents = await parseStudentsFromCSV(importFile)
+
+      let addedCount = 0
+      let skippedCount = 0
+      const errors: string[] = []
+
+      for (const studentData of parsedStudents) {
+        const validation = validateStudentData(studentData)
+        if (!validation.valid) {
+          errors.push(`${studentData.full_name}: ${validation.error}`)
+          skippedCount++
+          continue
+        }
+
+        // Verificar si el estudiante ya existe en este grupo
+        const { data: existingStudent } = await supabase
+          .from("students")
+          .select("id")
+          .eq("national_id", studentData.national_id)
+          .eq("group_id", group.id)
+          .single()
+
+        if (existingStudent) {
+          skippedCount++
+          continue
+        }
+
+        const { error: insertError } = await supabase.from("students").insert([
+          {
+            ...studentData,
+            group_id: group.id,
+          },
+        ])
+
+        if (insertError) {
+          errors.push(`${studentData.full_name}: ${insertError.message}`)
+          skippedCount++
+        } else {
+          addedCount++
+        }
+      }
+
+      if (addedCount > 0) {
+        setSuccess(
+          `Se importaron ${addedCount} estudiante(s) exitosamente${skippedCount > 0 ? ` (${skippedCount} omitido(s))` : ""}`
+        )
+        loadStudents()
+        setImportFile(null)
+        ;(e.target as HTMLFormElement).reset()
+      } else {
+        setError(`No se pudo importar ningún estudiante. ${errors.join("; ")}`)
+      }
+
+      if (errors.length > 0) {
+        console.warn("Import errors:", errors)
+      }
+    } catch (err: any) {
+      setError(err.message)
+    }
+
+    setImportLoading(false)
+  }
+
+  const handleMoveStudent = async () => {
+    if (!selectedStudentForMove || !targetGroupForMove) {
+      setError("Selecciona un estudiante y un grupo destino")
+      return
+    }
+
+    setMoveLoading(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const studentToMove = students.find((s) => s.id === selectedStudentForMove)
+      if (!studentToMove) throw new Error("Estudiante no encontrado")
+
+      const { error } = await supabase
+        .from("students")
+        .update({ group_id: targetGroupForMove })
+        .eq("id", selectedStudentForMove)
+
+      if (error) throw error
+
+      setSuccess(`${studentToMove.full_name} fue movido a otro grupo exitosamente`)
+      setSelectedStudentForMove(null)
+      setTargetGroupForMove(null)
+      loadStudents()
+    } catch (err: any) {
+      setError(err.message)
+    }
+
+    setMoveLoading(false)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -112,6 +249,18 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
         </div>
       </div>
 
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {success && (
+        <Alert className="border-green-200 bg-green-50">
+          <AlertDescription className="text-green-800">{success}</AlertDescription>
+        </Alert>
+      )}
+
       {/* Add Student Form */}
       <Card>
         <CardHeader>
@@ -123,18 +272,6 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAddStudent} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {success && (
-              <Alert className="border-green-200 bg-green-50">
-                <AlertDescription className="text-green-800">{success}</AlertDescription>
-              </Alert>
-            )}
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="fullName" className="text-sm font-medium">
@@ -145,19 +282,20 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
 
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
-                  Email (opcional)
+                  Email *
                 </label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   placeholder="estudiante@ejemplo.com"
+                  required
                   disabled={loading}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label htmlFor="nationalId" className="text-sm font-medium">
                   DNI *
@@ -187,6 +325,142 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
         </CardContent>
       </Card>
 
+      {/* Export and Import Students */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Export Students */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Exportar Estudiantes
+            </CardTitle>
+            <CardDescription>Descargar la lista de estudiantes en formato CSV</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={handleExportStudents}
+              disabled={students.length === 0}
+              className="w-full"
+              variant="outline"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Descargar CSV ({students.length} estudiante{students.length !== 1 ? "s" : ""})
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Import Students */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              Importar Estudiantes
+            </CardTitle>
+            <CardDescription>Cargar estudiantes desde un archivo CSV</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleImportStudents} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="csvFile" className="text-sm font-medium">
+                  Archivo CSV
+                </label>
+                <Input
+                  id="csvFile"
+                  name="csvFile"
+                  type="file"
+                  accept=".csv"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  disabled={importLoading}
+                />
+                <p className="text-xs text-gray-500">
+                  El archivo debe tener columnas: Nombre Completo, Email, DNI, Fecha de Nacimiento (opcional)
+                </p>
+              </div>
+
+              <Button type="submit" disabled={importLoading || !importFile} className="w-full">
+                {importLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Importando...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Importar
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Move Student */}
+      {students.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ArrowRight className="h-5 w-5" />
+              Mover Estudiante a Otro Grupo
+            </CardTitle>
+            <CardDescription>Transferir un estudiante a un grupo diferente</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Estudiante *</label>
+                  <Select value={selectedStudentForMove || ""} onValueChange={setSelectedStudentForMove}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un estudiante" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {students.map((student) => (
+                        <SelectItem key={student.id} value={student.id}>
+                          {student.full_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Grupo Destino *</label>
+                  <Select value={targetGroupForMove || ""} onValueChange={setTargetGroupForMove}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona un grupo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allGroups
+                        .filter((g) => g.id !== group.id)
+                        .map((g) => (
+                          <SelectItem key={g.id} value={g.id}>
+                            {g.name} - {g.place}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <Button onClick={handleMoveStudent} disabled={moveLoading || !selectedStudentForMove || !targetGroupForMove}>
+                {moveLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Moviendo...
+                  </>
+                ) : (
+                  <>
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                    Mover Estudiante
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Students List */}
       <Card>
         <CardHeader>
@@ -207,10 +481,10 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
                   <div>
                     <h4 className="font-medium">{student.full_name}</h4>
                     <div className="flex gap-4 text-sm text-gray-600">
-                      <span>{student.email ?? ""}</span>
+                      <span>{student.email}</span>
                       <span>DNI: {student.national_id}</span>
                       {student.birth_date && (
-                        <span>Nació: {parseLocalDate(student.birth_date).toLocaleDateString("es-AR")}</span>
+                        <span>Nació: {new Date(student.birth_date).toLocaleDateString("es-AR")}</span>
                       )}
                     </div>
                   </div>

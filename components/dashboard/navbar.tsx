@@ -2,28 +2,25 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
+import { LogOut, Menu, X } from "lucide-react"
 import { signOut, getCurrentUser, type AuthUser } from "@/lib/auth"
 import { useRouter } from "next/navigation"
 
-export default function Navbar() {
+interface NavbarProps {
+  onMenuToggle?: (open: boolean) => void
+}
+
+export default function Navbar({ onMenuToggle }: NavbarProps) {
   const [user, setUser] = useState<AuthUser | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    let mounted = true
     const loadUser = async () => {
-      try {
-        const { user } = await getCurrentUser()
-        if (mounted) setUser(user)
-      } catch {
-        if (mounted) setUser(null)
-      }
+      const { user } = await getCurrentUser()
+      setUser(user)
     }
     loadUser()
-    return () => {
-      mounted = false
-    }
   }, [])
 
   const handleSignOut = async () => {
@@ -31,37 +28,65 @@ export default function Navbar() {
     router.push("/auth/login")
   }
 
+  const toggleMobileMenu = () => {
+    const newState = !mobileMenuOpen
+    setMobileMenuOpen(newState)
+    onMenuToggle?.(newState)
+  }
+
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-white shadow-sm border-b sticky top-0 z-40">
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        {/* --- DESKTOP / TABLET: exactamente tu layout original --- */}
-        <div className="hidden md:flex justify-between items-center h-16">
-          <div className="flex items-center">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center gap-2">
             <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
+            <span className="font-bold text-lg hidden sm:inline">Campus</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">Hola, {user?.full_name || "Profesor"}</span>
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Salir
+
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline truncate max-w-[200px]">
+              {user?.full_name || "Profesor"}
+            </span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSignOut}
+              className="hidden sm:flex text-xs sm:text-base"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="ml-2 hidden sm:inline">Salir</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleMobileMenu}
+              className="sm:hidden"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
         </div>
 
-        {/* --- MOBILE: logo + saludo en una línea, botón Salir en fila separada alineado a la derecha --- */}
-        <div className="md:hidden flex flex-col py-3">
-          <div className="flex items-center">
-            <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
-            <span className="ml-3 text-sm text-gray-600">Hola, {user?.full_name || "Profesor"}</span>
-          </div>
-
-          <div className="mt-3 flex justify-end">
-            <Button variant="outline" size="sm" onClick={handleSignOut} className="flex items-center">
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden pb-4 border-t space-y-2">
+            <div className="px-2 py-2 text-sm text-gray-600 text-center">
+              {user?.full_name || "Profesor"}
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleSignOut}
+              className="w-full text-xs"
+            >
               <LogOut className="h-4 w-4 mr-2" />
               Salir
             </Button>
           </div>
-        </div>
+        )}
       </div>
     </nav>
   )

@@ -23,51 +23,37 @@ export default function SeccionCumpleanos() {
   const [todayBirthdays, setTodayBirthdays] = useState<StudentBirthday[]>([])
   const [loading, setLoading] = useState(true)
 
-  const parseLocalDate = (dateStr: string) => {
-    // Acepta "YYYY-MM-DD" o "YYYY-MM-DDTHH:MM:SS..." y devuelve un Date en la zona local (medianoche)
-    if (!dateStr) return new Date(NaN)
-    const dateOnly = dateStr.split("T")[0]
-    const [year, month, day] = dateOnly.split("-").map((n) => Number(n))
-    return new Date(year, month - 1, day)
-  }
-
   const calculateDaysUntilBirthday = (birthDate: string) => {
     const today = new Date()
-    // Usamos medianoche local para evitar que la hora actual afecte el cálculo
-    const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const birth = new Date(birthDate)
+    const currentYear = today.getFullYear()
 
-    const birth = parseLocalDate(birthDate)
-    const currentYear = todayMid.getFullYear()
-
-    // Inicializamos nextBirthday en el año actual a medianoche local
+    // Set birthday to current year
     let nextBirthday = new Date(currentYear, birth.getMonth(), birth.getDate())
-    const nextBirthdayMid = new Date(nextBirthday.getFullYear(), nextBirthday.getMonth(), nextBirthday.getDate())
 
-    // Si ya pasó, lo ponemos en el próximo año
-    let targetBirthdayMid = nextBirthdayMid
-    if (nextBirthdayMid.getTime() < todayMid.getTime()) {
-      targetBirthdayMid = new Date(currentYear + 1, birth.getMonth(), birth.getDate())
+    // If birthday already passed this year, set to next year
+    if (nextBirthday < today) {
+      nextBirthday = new Date(currentYear + 1, birth.getMonth(), birth.getDate())
     }
 
-    const msPerDay = 1000 * 60 * 60 * 24
-    const diffDays = Math.round((targetBirthdayMid.getTime() - todayMid.getTime()) / msPerDay)
+    const diffTime = nextBirthday.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
     return diffDays
   }
 
   const calculateAge = (birthDate: string) => {
     const today = new Date()
-    const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    const birth = parseLocalDate(birthDate)
-    let age = todayMid.getFullYear() - birth.getFullYear()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
 
-    // Si aún no cumplió este año, resta 1
-    const monthDiff = todayMid.getMonth() - birth.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && todayMid.getDate() < birth.getDate())) {
+    // Check if birthday hasn't occurred this year yet
+    const monthDiff = today.getMonth() - birth.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       age--
     }
 
-    return age + 1 // Edad que cumplirá
+    return age + 1 // Age they will turn
   }
 
   const loadBirthdays = async () => {
@@ -94,8 +80,7 @@ export default function SeccionCumpleanos() {
 
       const studentsWithBirthdays: StudentBirthday[] =
         data
-          ?.map((student: any) => {
-            // Asegurarse de que student.birth_date viene como "YYYY-MM-DD" o con T; parseLocalDate lo maneja.
+          ?.map((student) => {
             const daysUntil = calculateDaysUntilBirthday(student.birth_date)
             return {
               id: student.id,
@@ -108,7 +93,7 @@ export default function SeccionCumpleanos() {
               age_turning: calculateAge(student.birth_date),
             }
           })
-          .filter((student) => student.days_until_birthday <= 90) // Mostrar próximos 3 meses
+          .filter((student) => student.days_until_birthday <= 90) // Show next 3 months
           .sort((a, b) => a.days_until_birthday - b.days_until_birthday) || []
 
       // Separate today's birthdays from upcoming ones
@@ -129,7 +114,7 @@ export default function SeccionCumpleanos() {
   }, [])
 
   const formatBirthDate = (dateStr: string) => {
-    const date = parseLocalDate(dateStr)
+    const date = new Date(dateStr)
     return date.toLocaleDateString("es-AR", {
       day: "numeric",
       month: "long",
@@ -161,9 +146,9 @@ export default function SeccionCumpleanos() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-pink-700">
               <Cake className="h-5 w-5" />
-              ¡Estamos de festejo!
+              ¡Cumpleaños de Hoy!
             </CardTitle>
-            <CardDescription>Estudiante/s que cumple/n años hoy</CardDescription>
+            <CardDescription>Estudiantes que cumplen años hoy</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

@@ -28,6 +28,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [groups, setGroups] = useState<Group[]>([])
   const [loadingGroups, setLoadingGroups] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -123,11 +124,26 @@ export default function DashboardClient({ user }: DashboardClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar user={user} />
-      <div className="flex">
-        <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-        <main className="flex-1 p-6">{renderContent()}</main>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar user={user} onMenuToggle={setMobileMenuOpen} />
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection}
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          isMobile={true}
+        />
+        <Sidebar 
+          activeSection={activeSection} 
+          onSectionChange={setActiveSection}
+          isMobile={false}
+        />
+        <main className="flex-1 overflow-auto">
+          <div className="p-4 sm:p-6">
+            {renderContent()}
+          </div>
+        </main>
       </div>
     </div>
   )

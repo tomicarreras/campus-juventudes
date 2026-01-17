@@ -62,38 +62,44 @@ export default function SeleccionarGrupo({ onSelectGroup }: SeleccionarGrupoProp
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Seleccionar Grupo para Asistencia</h2>
-      <div className="grid gap-4">
+    <div className="space-y-4 max-w-6xl">
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-bold">Seleccionar Grupo para Asistencia</h2>
+      </div>
+      <div className="grid grid-cols-1 gap-4">
         {groups.map((group) => (
           <Card key={group.id} className="hover:shadow-md transition-shadow">
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">{group.name}</CardTitle>
-                  {group.description && <CardDescription className="mt-1">{group.description}</CardDescription>}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                <div className="min-w-0">
+                  <CardTitle className="text-base sm:text-lg truncate">{group.name}</CardTitle>
+                  {group.description && (
+                    <CardDescription className="mt-1 text-xs sm:text-sm line-clamp-2">{group.description}</CardDescription>
+                  )}
                 </div>
-                <Badge variant="secondary">{(group as any).students?.[0]?.count || 0} estudiantes</Badge>
+                <Badge variant="secondary" className="w-fit text-xs sm:text-sm">
+                  {(group as any).students?.[0]?.count || 0} estudiantes
+                </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4">
                 <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4" />
-                  {group.place}
+                  <MapPin className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{group.place}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
+                  <Calendar className="h-4 w-4 flex-shrink-0" />
                   {new Date(group.schedule_date).toLocaleDateString("es-AR")}
                 </div>
                 {group.schedule_time && (
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-4 w-4 flex-shrink-0" />
                     {group.schedule_time}
                   </div>
                 )}
               </div>
-              <Button onClick={() => onSelectGroup(group)} className="w-full">
+              <Button onClick={() => onSelectGroup(group)} className="w-full text-sm">
                 <CheckSquare className="h-4 w-4 mr-2" />
                 Tomar Asistencia
               </Button>
