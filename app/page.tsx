@@ -12,7 +12,7 @@ export default async function HomePage() {
   }
 
   // Check if user is logged in
-  const supabase = await createClient()
+  const supabase = createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()

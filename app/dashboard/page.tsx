@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   }
 
   // Get the user from the server
-  const supabase = await createClient()
+  const supabase = createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

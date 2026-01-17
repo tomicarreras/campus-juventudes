@@ -1,6 +1,4 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
-import { cookies } from "next/headers"
-import { cache } from "react"
 
 // Check if Supabase environment variables are available
 export const isSupabaseConfigured =
@@ -9,21 +7,32 @@ export const isSupabaseConfigured =
   typeof process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY === "string" &&
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.length > 0
 
-const createClientCached = cache(async () => {
-  if (!isSupabaseConfigured) {
-    console.warn("Supabase environment variables are not set. Using dummy client.")
-    return {
-      auth: {
-        getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-        getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-      },
-    }
-  }
+let supabaseClient: any = null
 
-  return createSupabaseClient(
+if (isSupabaseConfigured) {
+  supabaseClient = createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
-})
+} else {
+  // Fallback dummy client
+  supabaseClient = {
+    auth: {
+      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      signOut: () => Promise.resolve({ error: null }),
+    },
+    from: () => ({
+      select: () => Promise.resolve({ data: null, error: null }),
+      insert: () => Promise.resolve({ data: null, error: null }),
+      update: () => Promise.resolve({ data: null, error: null }),
+      delete: () => Promise.resolve({ data: null, error: null }),
+      eq: () => ({
+        single: () => Promise.resolve({ data: null, error: null }),
+        order: () => Promise.resolve({ data: null, error: null }),
+      }),
+    }),
+  }
+}
 
-export const createClient = () => createClientCached()
+export const createClient = () => supabaseClient
