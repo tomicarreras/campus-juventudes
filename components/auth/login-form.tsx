@@ -1,6 +1,5 @@
 "use client"
 
-import { useActionState } from "react"
 import { useFormStatus } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, LogIn } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useRef, useState } from "react"
 import { signIn } from "@/lib/actions"
 
 function SubmitButton() {
@@ -30,25 +29,33 @@ function SubmitButton() {
 
 export default function LoginForm() {
   const router = useRouter()
-  const [state, formAction] = useActionState(signIn, null)
-  const [isRedirecting, setIsRedirecting] = useState(false)
-  const [debugMessage, setDebugMessage] = useState("")
+  const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
 
-  // Handle successful login by redirecting
-  useEffect(() => {
-    if (state?.success && !isRedirecting) {
-      setIsRedirecting(true)
-      setDebugMessage("✅ Login exitoso, redirigiendo...")
-      
-      // Pequeño delay para permitir que las cookies se establezcan
-      const timer = setTimeout(() => {
-        console.log("🔄 Redirecting to dashboard")
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setError("")
+    setIsLoading(true)
+
+    try {
+      const formData = new FormData(formRef.current!)
+      const result = await signIn(null, formData)
+
+      if (result.error) {
+        setError(result.error)
+        setIsLoading(false)
+      } else if (result.success) {
+        console.log("✅ Login success, redirecting...")
+        // Redirigir inmediatamente
         router.push("/dashboard")
-      }, 1000)
-      
-      return () => clearTimeout(timer)
+      }
+    } catch (err) {
+      console.error("Form submit error:", err)
+      setError("Error inesperado")
+      setIsLoading(false)
     }
-  }, [state, router, isRedirecting])
+  }
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -60,16 +67,10 @@ export default function LoginForm() {
         <CardDescription>Ingresá a tu cuenta para gestionar la asistencia</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-4">
-          {state?.error && (
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+          {error && (
             <div className="bg-red-500/10 border border-red-500/50 text-red-700 px-4 py-3 rounded">
-              {state.error}
-            </div>
-          )}
-
-          {debugMessage && (
-            <div className="bg-blue-500/10 border border-blue-500/50 text-blue-700 px-4 py-3 rounded text-sm">
-              {debugMessage}
+              {error}
             </div>
           )}
 
@@ -84,7 +85,7 @@ export default function LoginForm() {
               placeholder="tu@email.com" 
               autoComplete="email" 
               required 
-              disabled={isRedirecting}
+              disabled={isLoading}
             />
           </div>
 
@@ -99,11 +100,24 @@ export default function LoginForm() {
               placeholder="Tu contraseña"
               autoComplete="current-password"
               required
-              disabled={isRedirecting}
+              disabled={isLoading}
             />
           </div>
 
-          <SubmitButton />
+          <Button 
+            type="submit" 
+            disabled={isLoading} 
+            className="w-full"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Iniciando sesión...
+              </>
+            ) : (
+              "Iniciar sesión"
+            )}
+          </Button>
 
           <div className="text-center text-sm text-muted-foreground">
             ¿No tenés cuenta?{" "}
