@@ -1,26 +1,39 @@
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 import DashboardClient from "@/components/dashboard/dashboard-client"
 
-export default async function DashboardPage() {
-  // If Supabase is not configured, show setup message directly
-  if (!isSupabaseConfigured) {
+export default function DashboardPage() {
+  const router = useRouter()
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { user }, error } = await supabase.auth.getUser()
+        if (error || !user) {
+          router.push("/auth/login")
+        } else {
+          setUser(user)
+          setLoading(false)
+        }
+      } catch (error) {
+        router.push("/auth/login")
+      }
+    }
+    checkAuth()
+  }, [router])
+
+  if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <h1 className="text-2xl font-bold mb-4">Connect Supabase to get started</h1>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div>Loading...</div>
       </div>
     )
-  }
-
-  // Get the user from the server
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // If no user, redirect to login
-  if (!user) {
-    redirect("/auth/login")
   }
 
   return <DashboardClient user={user} />

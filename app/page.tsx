@@ -1,26 +1,32 @@
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+"use client"
 
-export default async function HomePage() {
-  // If Supabase is not configured, show setup message directly
-  if (!isSupabaseConfigured) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <h1 className="text-2xl font-bold mb-4">Connect Supabase to get started</h1>
-      </div>
-    )
-  }
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 
-  // Check if user is logged in
-  const supabase = createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+export default function HomePage() {
+  const router = useRouter()
 
-  // Redirect based on auth status
-  if (session) {
-    redirect("/dashboard")
-  } else {
-    redirect("/auth/login")
-  }
+  useEffect(() => {
+    const checkAuth = async () => {
+      const supabase = createClient()
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          router.push("/dashboard")
+        } else {
+          router.push("/auth/login")
+        }
+      } catch (error) {
+        router.push("/auth/login")
+      }
+    }
+    checkAuth()
+  }, [router])
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+    </div>
+  )
 }

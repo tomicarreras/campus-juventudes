@@ -1,26 +1,37 @@
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
 import LoginForm from "@/components/auth/login-form"
 
-export default async function LoginPage() {
-  // If Supabase is not configured, show setup message directly
-  if (!isSupabaseConfigured) {
+export default function LoginPage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+          router.push("/dashboard")
+        } else {
+          setLoading(false)
+        }
+      } catch (error) {
+        setLoading(false)
+      }
+    }
+    checkAuth()
+  }, [router])
+
+  if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <h1 className="text-2xl font-bold mb-4">Connect Supabase to get started</h1>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div>Loading...</div>
       </div>
     )
-  }
-
-  // Check if user is already logged in
-  const supabase = createClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  // If user is logged in, redirect to dashboard
-  if (session) {
-    redirect("/dashboard")
   }
 
   return (
@@ -28,7 +39,7 @@ export default async function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <img src="/logo.png" alt="Logo del Sistema" className="h-16 mx-auto mb-2" />
-          <p className="text-gray-600">Plataforma para profesores</p>
+          <h1 className="text-3xl font-bold text-gray-800">Iniciar Sesión</h1>
         </div>
         <LoginForm />
       </div>
