@@ -60,11 +60,37 @@ export async function parseStudentsFromCSV(file: File): Promise<any[]> {
             )
           }
 
+          // Convertir fecha de DD/MM/YYYY a YYYY-MM-DD
+          let birthDate = null
+          if (cleanValues[3]) {
+            try {
+              const dateStr = cleanValues[3]
+              // Detectar formato DD/MM/YYYY
+              const dateRegex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+              const match = dateStr.match(dateRegex)
+              
+              if (match) {
+                const [, day, month, year] = match
+                // Validar que sea una fecha válida
+                const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+                if (date instanceof Date && !isNaN(date.getTime())) {
+                  // Convertir a formato YYYY-MM-DD (en UTC para evitar problemas de zona horaria)
+                  birthDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+                }
+              } else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                // Si ya está en formato YYYY-MM-DD, usarlo tal cual
+                birthDate = dateStr
+              }
+            } catch (e) {
+              console.warn(`Error parsing date for student ${cleanValues[0]}: ${cleanValues[3]}`)
+            }
+          }
+
           return {
             full_name: cleanValues[0],
             email: cleanValues[1],
             national_id: cleanValues[2],
-            birth_date: cleanValues[3] || null,
+            birth_date: birthDate,
           }
         })
 

@@ -154,27 +154,61 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
         }
 
         // Verificar si el estudiante ya existe en este grupo
-        const { data: existingStudent } = await supabase
-          .from("students")
-          .select("id")
-          .eq("national_id", studentData.national_id)
-          .eq("group_id", group.id)
-          .single()
+        let existingStudent = null
+        let retries = 0
+        while (retries < 3) {
+          try {
+            const { data } = await supabase
+              .from("students")
+              .select("id")
+              .eq("national_id", studentData.national_id)
+              .eq("group_id", group.id)
+              .single()
+            existingStudent = data
+            break
+          } catch (err) {
+            retries++
+            if (retries < 3) {
+              await new Promise(resolve => setTimeout(resolve, 500))
+            }
+          }
+        }
 
         if (existingStudent) {
           skippedCount++
           continue
         }
 
-        const { error: insertError } = await supabase.from("students").insert([
-          {
-            ...studentData,
-            group_id: group.id,
-          },
-        ])
+        // Reintentar la inserción si falla por timeout
+        let insertError = null
+        let insertRetries = 0
+        while (insertRetries < 3) {
+          try {
+            const result = await supabase.from("students").insert([
+              {
+                ...studentData,
+                group_id: group.id,
+              },
+            ])
+            insertError = result.error
+            if (!insertError) {
+              break
+            }
+            insertRetries++
+            if (insertRetries < 3) {
+              await new Promise(resolve => setTimeout(resolve, 500))
+            }
+          } catch (err: any) {
+            insertError = err
+            insertRetries++
+            if (insertRetries < 3) {
+              await new Promise(resolve => setTimeout(resolve, 500))
+            }
+          }
+        }
 
         if (insertError) {
-          errors.push(`${studentData.full_name}: ${insertError.message}`)
+          errors.push(`${studentData.full_name}: ${insertError.message || insertError}`)
           skippedCount++
         } else {
           addedCount++
@@ -189,7 +223,7 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
         setImportFile(null)
         ;(e.target as HTMLFormElement).reset()
       } else {
-        setError(`No se pudo importar ningún estudiante. ${errors.join("; ")}`)
+        setError(`No se pudo importar ningún estudiante. ${errors.slice(0, 3).join("; ")}${errors.length > 3 ? `... y ${errors.length - 3} más` : ""}`)
       }
 
       if (errors.length > 0) {
