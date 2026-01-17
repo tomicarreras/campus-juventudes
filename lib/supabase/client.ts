@@ -76,29 +76,5 @@ if (isSupabaseConfigured) {
 export const supabase = supabaseInstance
 
 export const createClient = () => {
-  if (isSupabaseConfigured) {
-    return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        storage: {
-          getItem: (key: string) => {
-            if (typeof localStorage !== "undefined") {
-              return localStorage.getItem(key)
-            }
-            return null
-          },
-          setItem: (key: string, value: string) => {
-            if (typeof localStorage !== "undefined") {
-              localStorage.setItem(key, value)
-            }
-          },
-          removeItem: (key: string) => {
-            if (typeof localStorage !== "undefined") {
-              localStorage.removeItem(key)
-            }
-          },
-        } as any,
-      },
-    })
-  }
   return supabaseInstance
 }

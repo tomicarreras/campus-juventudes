@@ -10,7 +10,6 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { signIn } from "@/lib/actions"
-import { createClient } from "@/lib/supabase/client"
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -39,31 +38,13 @@ export default function LoginForm() {
   useEffect(() => {
     if (state?.success && !isRedirecting) {
       setIsRedirecting(true)
-      setDebugMessage("✅ Login exitoso, verificando sesión...")
+      setDebugMessage("✅ Login exitoso, redirigiendo...")
       
-      // Pequeño delay para permitir que la sesión se persista
-      const timer = setTimeout(async () => {
-        try {
-          // Verificar que la sesión exista antes de redirigir
-          const supabase = createClient()
-          const { data: { session } } = await supabase.auth.getSession()
-          
-          if (session) {
-            setDebugMessage("✅ Sesión confirmada, redirigiendo...")
-            console.log("🔄 Session confirmed, redirecting to dashboard")
-            router.push("/dashboard")
-          } else {
-            setDebugMessage("⚠️ Sesión no encontrada, reintentando...")
-            console.log("⚠️ Session not found after login")
-            // Reintentar después de otro delay
-            setTimeout(() => router.push("/dashboard"), 1000)
-          }
-        } catch (err) {
-          console.error("Error checking session:", err)
-          // Aun así intentar redirigir
-          router.push("/dashboard")
-        }
-      }, 800)
+      // Pequeño delay para permitir que las cookies se establezcan
+      const timer = setTimeout(() => {
+        console.log("🔄 Redirecting to dashboard")
+        router.push("/dashboard")
+      }, 1000)
       
       return () => clearTimeout(timer)
     }

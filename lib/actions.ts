@@ -5,35 +5,47 @@ import { cookies } from "next/headers"
 
 const getSupabase = async () => {
   const cookieStore = await cookies()
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || ""
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
   
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-    {
-      auth: {
-        storage: {
-          getItem: (key: string) => {
-            const cookie = cookieStore.get(key)
-            return cookie?.value || null
-          },
-          setItem: (key: string, value: string) => {
-            try {
-              cookieStore.set(key, value, { path: "/", maxAge: 60 * 60 * 24 * 365 })
-            } catch (e) {
-              // Cookie setting failed - ignore
-            }
-          },
-          removeItem: (key: string) => {
-            try {
-              cookieStore.delete(key)
-            } catch (e) {
-              // Cookie deletion failed - ignore
-            }
-          },
-        } as any,
-      },
-    }
-  )
+  if (!url || !key) {
+    throw new Error("Supabase URL or Key not configured")
+  }
+  
+  // Crear instancia con storage de cookies - IMPORTANTE: una nueva instancia por request
+  const supabase = createSupabaseClient(url, key, {
+    auth: {
+      storage: {
+        getItem: (key: string) => {
+          const cookie = cookieStore.get(key)
+          console.log(`📦 Getting cookie ${key}:`, !!cookie?.value)
+          return cookie?.value || null
+        },
+        setItem: (key: string, value: string) => {
+          console.log(`📦 Setting cookie ${key}`)
+          try {
+            cookieStore.set(key, value, { 
+              path: "/", 
+              maxAge: 60 * 60 * 24 * 365,
+              httpOnly: false
+            })
+          } catch (e) {
+            console.error("Failed to set cookie:", e)
+          }
+        },
+        removeItem: (key: string) => {
+          console.log(`📦 Removing cookie ${key}`)
+          try {
+            cookieStore.delete(key)
+          } catch (e) {
+            console.error("Failed to delete cookie:", e)
+          }
+        },
+      } as any,
+    },
+  })
+  
+  return supabase
 }
 
 export async function signUp(prevState: any, formData: FormData) {
@@ -52,17 +64,18 @@ export async function signUp(prevState: any, formData: FormData) {
   try {
     const supabase = await getSupabase()
     
-    // Crear usuario en Supabase Auth
+    console.log("📝 Creating account for:", email)
+    
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email.toString(),
       password: password.toString(),
     })
 
     if (authError) {
+      console.error("❌ SignUp error:", authError.message)
       return { error: authError.message }
     }
 
-    // Si el usuario se creó exitosamente, crear registro en tabla teachers
     if (authData.user) {
       const { error: teacherError } = await supabase.from("teachers").insert([
         {
@@ -80,7 +93,7 @@ export async function signUp(prevState: any, formData: FormData) {
 
     return { success: "Cuenta creada exitosamente. Ya podés iniciar sesión." }
   } catch (error) {
-    console.error("Sign up error:", error)
+    console.error("SignUp exception:", error)
     return { error: "Error inesperado. Intentá de nuevo." }
   }
 }
@@ -112,41 +125,7 @@ export async function signIn(prevState: any, formData: FormData) {
       return { error: error.message }
     }
 
-    console.log("✅ Login successful, session data:", {
-      user: data.user?.id,
-      hasSession: !!data.session,
-      accessToken: !!data.session?.access_token
-    })
-
-    // Asegurar que la sesión se persista en cookies del servidor
-    if (data.session) {
-      const cookieStore = await cookies()
-      try {
-        // Guardar el token de acceso
-        cookieStore.set("sb-access-token", data.session.access_token, { 
-          path: "/", 
-          maxAge: 60 * 60 * 24 * 365,
-          httpOnly: false, // Cliente necesita leer esto
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax"
-        })
-        
-        // Guardar el refresh token si existe
-        if (data.session.refresh_token) {
-          cookieStore.set("sb-refresh-token", data.session.refresh_token, { 
-            path: "/", 
-            maxAge: 60 * 60 * 24 * 365,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax"
-          })
-        }
-        
-        console.log("✅ Tokens saved to cookies")
-      } catch (e) {
-        console.error("⚠️ Failed to set cookies:", e)
-      }
-    }
+    console.log("✅ Login successful for:", email)
 
     return { success: true }
   } catch (error) {
@@ -158,15 +137,9 @@ export async function signIn(prevState: any, formData: FormData) {
 export async function signOut() {
   try {
     const supabase = await getSupabase()
+    console.log("🔓 Signing out")
     await supabase.auth.signOut()
-    
-    const cookieStore = await cookies()
-    try {
-      cookieStore.delete("sb-auth-token")
-    } catch (e) {
-      // Cookie deletion failed - ignore
-    }
   } catch (error) {
-    console.error("Sign out error:", error)
+    console.error("SignOut error:", error)
   }
 }
