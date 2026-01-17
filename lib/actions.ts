@@ -1,7 +1,13 @@
 "use server"
 
-import { createServerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+
+const getSupabase = () => {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  )
+}
 
 export async function signUp(prevState: any, formData: FormData) {
   if (!formData) {
@@ -16,31 +22,9 @@ export async function signUp(prevState: any, formData: FormData) {
     return { error: "Email, contraseña y nombre completo son obligatorios" }
   }
 
-  const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
-
   try {
+    const supabase = getSupabase()
+    
     // Crear usuario en Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email.toString(),
@@ -86,31 +70,9 @@ export async function signIn(prevState: any, formData: FormData) {
     return { error: "Email y contraseña son obligatorios" }
   }
 
-  const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
-
   try {
+    const supabase = getSupabase()
+    
     const { error } = await supabase.auth.signInWithPassword({
       email: email.toString(),
       password: password.toString(),
@@ -128,29 +90,10 @@ export async function signIn(prevState: any, formData: FormData) {
 }
 
 export async function signOut() {
-  const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
-
-  await supabase.auth.signOut()
+  try {
+    const supabase = getSupabase()
+    await supabase.auth.signOut()
+  } catch (error) {
+    console.error("Sign out error:", error)
+  }
 }

@@ -12,17 +12,44 @@ export const isSupabaseConfigured =
   typeof supabaseAnonKey === "string" &&
   supabaseAnonKey.length > 0
 
+// Proxy handler for dummy client methods
+const dummyHandler = {
+  get: () => new Proxy({}, dummyHandler),
+  apply: () => Promise.resolve({ data: null, error: null }),
+}
+
 // Create a singleton instance of the Supabase client for Client Components
 let supabaseInstance: any = null
 
 if (isSupabaseConfigured) {
-  supabaseInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey)
-} else {
-  // Create a dummy/proxy client that won't crash
-  supabaseInstance = {
-    auth: { getSession: () => Promise.resolve({ data: { session: null }, error: null }) },
-    from: () => ({ select: () => Promise.resolve({ data: null, error: null }) }),
+  try {
+    supabaseInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey)
+  } catch (e) {
+    console.error("Failed to create Supabase client:", e)
+    supabaseInstance = new Proxy({}, dummyHandler)
   }
+} else {
+  // Create a comprehensive dummy client that won't error on method calls
+  supabaseInstance = new Proxy(
+    {
+      auth: {
+        getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+        getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+        signOut: () => Promise.resolve({ error: null }),
+        signIn: () => Promise.resolve({ data: null, error: null }),
+        signUp: () => Promise.resolve({ data: null, error: null }),
+      },
+      from: () => ({
+        select: () => Promise.resolve({ data: null, error: null }),
+        insert: () => Promise.resolve({ data: null, error: null }),
+        update: () => Promise.resolve({ data: null, error: null }),
+        delete: () => Promise.resolve({ data: null, error: null }),
+        eq: () => ({ single: () => Promise.resolve({ data: null, error: null }), order: () => Promise.resolve({ data: null, error: null }) }),
+        order: () => Promise.resolve({ data: null, error: null }),
+      }),
+    },
+    dummyHandler
+  )
 }
 
 export const supabase = supabaseInstance
