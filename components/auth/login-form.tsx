@@ -52,8 +52,27 @@ export default function LoginForm() {
         setError(result.error)
         setIsLoading(false)
       } else if (result.success) {
-        console.log("✅ Login success, redirecting...")
-        // Redirigir inmediatamente
+        console.log("✅ Login success, saving session to localStorage")
+        
+        // Guardar la sesión en localStorage para que el cliente la encuentre
+        if (result.session) {
+          const sessionData = {
+            access_token: result.session.access_token,
+            refresh_token: result.session.refresh_token,
+            user: result.session.user,
+            expires_at: Date.now() + (60 * 60 * 24 * 365 * 1000), // 1 año
+          }
+          
+          // Guardar en localStorage con la clave que Supabase espera
+          localStorage.setItem(
+            `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split(".")[0].split("//")[1]}-auth-token`,
+            JSON.stringify(sessionData)
+          )
+          
+          console.log("💾 Session saved to localStorage")
+        }
+        
+        // Pequeño delay para asegurar que localStorage se escribió
         setTimeout(() => {
           console.log("🚀 Pushing to /dashboard")
           router.push("/dashboard")

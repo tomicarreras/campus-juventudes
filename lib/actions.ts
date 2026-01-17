@@ -127,6 +127,18 @@ export async function signIn(prevState: any, formData: FormData) {
 
     console.log("✅ Login successful for:", email)
 
+    // Retornar la sesión para que el cliente la guarde
+    if (data.session) {
+      return { 
+        success: true,
+        session: {
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+          user: data.session.user,
+        }
+      }
+    }
+
     return { success: true }
   } catch (error) {
     console.error("❌ Login exception:", error)

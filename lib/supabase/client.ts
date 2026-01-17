@@ -28,21 +28,28 @@ if (isSupabaseConfigured) {
         storage: {
           getItem: (key: string) => {
             if (typeof localStorage !== "undefined") {
-              return localStorage.getItem(key)
+              const value = localStorage.getItem(key)
+              console.log(`📦 Getting from localStorage - ${key}:`, !!value)
+              return value
             }
             return null
           },
           setItem: (key: string, value: string) => {
             if (typeof localStorage !== "undefined") {
+              console.log(`📦 Setting to localStorage - ${key}`)
               localStorage.setItem(key, value)
             }
           },
           removeItem: (key: string) => {
             if (typeof localStorage !== "undefined") {
+              console.log(`📦 Removing from localStorage - ${key}`)
               localStorage.removeItem(key)
             }
           },
         } as any,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
       },
     })
   } catch (e) {
