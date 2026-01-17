@@ -23,7 +23,28 @@ let supabaseInstance: any = null
 
 if (isSupabaseConfigured) {
   try {
-    supabaseInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey)
+    supabaseInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: {
+          getItem: (key: string) => {
+            if (typeof localStorage !== "undefined") {
+              return localStorage.getItem(key)
+            }
+            return null
+          },
+          setItem: (key: string, value: string) => {
+            if (typeof localStorage !== "undefined") {
+              localStorage.setItem(key, value)
+            }
+          },
+          removeItem: (key: string) => {
+            if (typeof localStorage !== "undefined") {
+              localStorage.removeItem(key)
+            }
+          },
+        } as any,
+      },
+    })
   } catch (e) {
     console.error("Failed to create Supabase client:", e)
     supabaseInstance = new Proxy({}, dummyHandler)
@@ -54,4 +75,30 @@ if (isSupabaseConfigured) {
 
 export const supabase = supabaseInstance
 
-export const createClient = () => supabase
+export const createClient = () => {
+  if (isSupabaseConfigured) {
+    return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: {
+          getItem: (key: string) => {
+            if (typeof localStorage !== "undefined") {
+              return localStorage.getItem(key)
+            }
+            return null
+          },
+          setItem: (key: string, value: string) => {
+            if (typeof localStorage !== "undefined") {
+              localStorage.setItem(key, value)
+            }
+          },
+          removeItem: (key: string) => {
+            if (typeof localStorage !== "undefined") {
+              localStorage.removeItem(key)
+            }
+          },
+        } as any,
+      },
+    })
+  }
+  return supabaseInstance
+}

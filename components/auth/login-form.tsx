@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, LogIn } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { signIn } from "@/lib/actions"
+import { createClient } from "@/lib/supabase/client"
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -31,13 +32,19 @@ function SubmitButton() {
 export default function LoginForm() {
   const router = useRouter()
   const [state, formAction] = useActionState(signIn, null)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   // Handle successful login by redirecting
   useEffect(() => {
-    if (state?.success) {
-      router.push("/dashboard")
+    if (state?.success && !isRedirecting) {
+      setIsRedirecting(true)
+      // Pequeño delay para permitir que la sesión se persista
+      const timer = setTimeout(() => {
+        router.push("/dashboard")
+      }, 500)
+      return () => clearTimeout(timer)
     }
-  }, [state, router])
+  }, [state, router, isRedirecting])
 
   return (
     <Card className="w-full max-w-md mx-auto">

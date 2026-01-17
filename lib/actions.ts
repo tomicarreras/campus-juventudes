@@ -1,11 +1,38 @@
 "use server"
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+import { cookies } from "next/headers"
 
-const getSupabase = () => {
+const getSupabase = async () => {
+  const cookieStore = await cookies()
+  
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+    {
+      auth: {
+        storage: {
+          getItem: (key: string) => {
+            const cookie = cookieStore.get(key)
+            return cookie?.value || null
+          },
+          setItem: (key: string, value: string) => {
+            try {
+              cookieStore.set(key, value, { path: "/", maxAge: 60 * 60 * 24 * 365 })
+            } catch (e) {
+              // Cookie setting failed - ignore
+            }
+          },
+          removeItem: (key: string) => {
+            try {
+              cookieStore.delete(key)
+            } catch (e) {
+              // Cookie deletion failed - ignore
+            }
+          },
+        } as any,
+      },
+    }
   )
 }
 
@@ -23,7 +50,7 @@ export async function signUp(prevState: any, formData: FormData) {
   }
 
   try {
-    const supabase = getSupabase()
+    const supabase = await getSupabase()
     
     // Crear usuario en Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -71,15 +98,31 @@ export async function signIn(prevState: any, formData: FormData) {
   }
 
   try {
-    const supabase = getSupabase()
+    const supabase = await getSupabase()
     
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email.toString(),
       password: password.toString(),
     })
 
     if (error) {
       return { error: error.message }
+    }
+
+    // Asegurar que la sesión se persista en cookies
+    if (data.session) {
+      const cookieStore = await cookies()
+      try {
+        cookieStore.set("sb-auth-token", data.session.access_token, { 
+          path: "/", 
+          maxAge: 60 * 60 * 24 * 365,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax"
+        })
+      } catch (e) {
+        // Cookie setting failed - ignore
+      }
     }
 
     return { success: true }
@@ -91,8 +134,15 @@ export async function signIn(prevState: any, formData: FormData) {
 
 export async function signOut() {
   try {
-    const supabase = getSupabase()
+    const supabase = await getSupabase()
     await supabase.auth.signOut()
+    
+    const cookieStore = await cookies()
+    try {
+      cookieStore.delete("sb-auth-token")
+    } catch (e) {
+      // Cookie deletion failed - ignore
+    }
   } catch (error) {
     console.error("Sign out error:", error)
   }
