@@ -13,12 +13,18 @@ export const isSupabaseConfigured =
   supabaseAnonKey.length > 0
 
 // Create a singleton instance of the Supabase client for Client Components
-let supabaseInstance: ReturnType<typeof createSupabaseClient> | null = null
+let supabaseInstance: any = null
 
 if (isSupabaseConfigured) {
   supabaseInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey)
+} else {
+  // Create a dummy/proxy client that won't crash
+  supabaseInstance = {
+    auth: { getSession: () => Promise.resolve({ data: { session: null }, error: null }) },
+    from: () => ({ select: () => Promise.resolve({ data: null, error: null }) }),
+  }
 }
 
-export const supabase = supabaseInstance as ReturnType<typeof createSupabaseClient>
+export const supabase = supabaseInstance
 
 export const createClient = () => supabase
