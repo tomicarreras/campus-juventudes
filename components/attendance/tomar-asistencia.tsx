@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Loader2, ArrowLeft, Save, Calendar, Users } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import { getCurrentUser } from "@/lib/auth"
+import { getTodayDateString } from "@/lib/utils"
 import type { Group, Student, AttendanceRecord } from "@/lib/types"
 
 interface TomarAsistenciaProps {
@@ -19,7 +20,7 @@ interface TomarAsistenciaProps {
 
 export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps) {
   const [students, setStudents] = useState<Student[]>([])
-  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split("T")[0])
+  const [attendanceDate, setAttendanceDate] = useState(getTodayDateString())
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

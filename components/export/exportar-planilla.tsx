@@ -72,7 +72,9 @@ export default function ExportarPlanilla({ groups }: ExportarPlanillaProps) {
       // Encabezados
       let csvContent = "Nombre completo,Email,DNI"
       dates.forEach((date) => {
-        csvContent += `,${format(new Date(date), "dd/MM/yyyy", { locale: es })}`
+        // date is already in YYYY-MM-DD format from the database
+        const [year, month, day] = date.split("-")
+        csvContent += `,${day}/${month}/${year}`
       })
       csvContent += ",Total Presentes,Total Ausentes,% Asistencia\n"
 

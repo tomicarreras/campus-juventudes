@@ -40,7 +40,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="Logo del Sistema" className="h-10" />
-            <span className="font-bold text-lg hidden sm:inline">Campus</span>
+            <span className="font-bold text-lg hidden sm:inline"></span>
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-4">

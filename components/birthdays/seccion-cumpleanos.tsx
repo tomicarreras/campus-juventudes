@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Gift, Calendar, Users, Cake } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import { getCurrentUser } from "@/lib/auth"
+import { isBirthdayToday, daysUntilBirthday } from "@/lib/utils"
 
 interface StudentBirthday {
   id: string
@@ -22,25 +23,6 @@ export default function SeccionCumpleanos() {
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<StudentBirthday[]>([])
   const [todayBirthdays, setTodayBirthdays] = useState<StudentBirthday[]>([])
   const [loading, setLoading] = useState(true)
-
-  const calculateDaysUntilBirthday = (birthDate: string) => {
-    const today = new Date()
-    const birth = new Date(birthDate)
-    const currentYear = today.getFullYear()
-
-    // Set birthday to current year
-    let nextBirthday = new Date(currentYear, birth.getMonth(), birth.getDate())
-
-    // If birthday already passed this year, set to next year
-    if (nextBirthday < today) {
-      nextBirthday = new Date(currentYear + 1, birth.getMonth(), birth.getDate())
-    }
-
-    const diffTime = nextBirthday.getTime() - today.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-    return diffDays
-  }
 
   const calculateAge = (birthDate: string) => {
     const today = new Date()
@@ -81,7 +63,7 @@ export default function SeccionCumpleanos() {
       const studentsWithBirthdays: StudentBirthday[] =
         data
           ?.map((student) => {
-            const daysUntil = calculateDaysUntilBirthday(student.birth_date)
+            const daysUntil = daysUntilBirthday(student.birth_date)
             return {
               id: student.id,
               full_name: student.full_name,

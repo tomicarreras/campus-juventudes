@@ -67,8 +67,15 @@ export default function CalendarioAsistencia({ onViewDay }: CalendarioAsistencia
 
       const year = currentDate.getFullYear()
       const month = currentDate.getMonth()
-      const startDate = new Date(year, month, 1).toISOString().split("T")[0]
-      const endDate = new Date(year, month + 1, 0).toISOString().split("T")[0]
+      
+      // Create date strings in YYYY-MM-DD format without timezone conversion
+      const monthStr = String(month + 1).padStart(2, "0")
+      const startDate = `${year}-${monthStr}-01`
+      
+      // Get last day of month
+      const lastDay = new Date(year, month + 1, 0).getDate()
+      const lastDayStr = String(lastDay).padStart(2, "0")
+      const endDate = `${year}-${monthStr}-${lastDayStr}`
 
       let query = supabase
         .from("attendance")
@@ -157,7 +164,11 @@ export default function CalendarioAsistencia({ onViewDay }: CalendarioAsistencia
   }
 
   const getAttendanceForDay = (day: number) => {
-    const dateStr = new Date(currentDate.getFullYear(), currentDate.getMonth(), day).toISOString().split("T")[0]
+    // Create date string in YYYY-MM-DD format without timezone conversion
+    const year = currentDate.getFullYear()
+    const month = String(currentDate.getMonth() + 1).padStart(2, "0")
+    const dayStr = String(day).padStart(2, "0")
+    const dateStr = `${year}-${month}-${dayStr}`
     return attendanceData.filter((att) => att.date === dateStr)
   }
 
