@@ -100,34 +100,57 @@ export async function signIn(prevState: any, formData: FormData) {
   try {
     const supabase = await getSupabase()
     
+    console.log("🔐 Attempting login for:", email)
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.toString(),
       password: password.toString(),
     })
 
     if (error) {
+      console.error("❌ Login error:", error.message)
       return { error: error.message }
     }
 
-    // Asegurar que la sesión se persista en cookies
+    console.log("✅ Login successful, session data:", {
+      user: data.user?.id,
+      hasSession: !!data.session,
+      accessToken: !!data.session?.access_token
+    })
+
+    // Asegurar que la sesión se persista en cookies del servidor
     if (data.session) {
       const cookieStore = await cookies()
       try {
-        cookieStore.set("sb-auth-token", data.session.access_token, { 
+        // Guardar el token de acceso
+        cookieStore.set("sb-access-token", data.session.access_token, { 
           path: "/", 
           maxAge: 60 * 60 * 24 * 365,
-          httpOnly: true,
+          httpOnly: false, // Cliente necesita leer esto
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax"
         })
+        
+        // Guardar el refresh token si existe
+        if (data.session.refresh_token) {
+          cookieStore.set("sb-refresh-token", data.session.refresh_token, { 
+            path: "/", 
+            maxAge: 60 * 60 * 24 * 365,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax"
+          })
+        }
+        
+        console.log("✅ Tokens saved to cookies")
       } catch (e) {
-        // Cookie setting failed - ignore
+        console.error("⚠️ Failed to set cookies:", e)
       }
     }
 
     return { success: true }
   } catch (error) {
-    console.error("Login error:", error)
+    console.error("❌ Login exception:", error)
     return { error: "Error inesperado. Intentá de nuevo." }
   }
 }
