@@ -14,33 +14,26 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log("🔍 Checking auth in dashboard")
         const supabase = createClient()
         
         // Intentar obtener la sesión primero
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        console.log("📋 Session check:", { hasSession: !!session, error: sessionError?.message })
+        const { data: { session } } = await supabase.auth.getSession()
         
         if (session) {
-          console.log("✅ Found session, setting user")
           setUser(session.user)
           setLoading(false)
           return
         }
         
         // Si no hay sesión, intentar obtener el usuario
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
-        console.log("👤 User check:", { hasUser: !!user, error: userError?.message })
+        const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          console.log("✅ Found user, setting user")
           setUser(user)
           setLoading(false)
         } else {
-          console.log("❌ No user found, redirecting to login")
           // Reintentar una vez después de un pequeño delay
-          if (attempts < 2) {
-            console.log("🔄 Retrying auth check...")
+          if (attempts < 1) {
             setAttempts(attempts + 1)
             setTimeout(() => {
               checkAuth()
@@ -50,9 +43,7 @@ export default function DashboardPage() {
           }
         }
       } catch (error) {
-        console.error("❌ Auth check error:", error)
-        if (attempts < 2) {
-          console.log("🔄 Retrying after error...")
+        if (attempts < 1) {
           setAttempts(attempts + 1)
           setTimeout(() => {
             checkAuth()

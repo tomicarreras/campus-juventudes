@@ -39,21 +39,14 @@ export default function LoginForm() {
     setIsLoading(true)
 
     try {
-      console.log("📝 Submitting login form")
       const formData = new FormData(formRef.current!)
-      const email = formData.get("email")
-      console.log("🔐 Attempting login for:", email)
       
       const result = await signIn(null, formData)
-      console.log("📦 Server action result:", result)
 
       if (result.error) {
-        console.error("❌ Login error:", result.error)
         setError(result.error)
         setIsLoading(false)
       } else if (result.success) {
-        console.log("✅ Login success, saving session to localStorage")
-        
         // Guardar la sesión en localStorage para que el cliente la encuentre
         if (result.session) {
           const sessionData = {
@@ -68,18 +61,15 @@ export default function LoginForm() {
             `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split(".")[0].split("//")[1]}-auth-token`,
             JSON.stringify(sessionData)
           )
-          
-          console.log("💾 Session saved to localStorage")
         }
         
         // Pequeño delay para asegurar que localStorage se escribió
         setTimeout(() => {
-          console.log("🚀 Pushing to /dashboard")
           router.push("/dashboard")
         }, 300)
       }
     } catch (err) {
-      console.error("💥 Form submit error:", err)
+      console.error("Form submit error:", err)
       setError("Error inesperado")
       setIsLoading(false)
     }

@@ -28,21 +28,17 @@ if (isSupabaseConfigured) {
         storage: {
           getItem: (key: string) => {
             if (typeof localStorage !== "undefined") {
-              const value = localStorage.getItem(key)
-              console.log(`📦 Getting from localStorage - ${key}:`, !!value)
-              return value
+              return localStorage.getItem(key)
             }
             return null
           },
           setItem: (key: string, value: string) => {
             if (typeof localStorage !== "undefined") {
-              console.log(`📦 Setting to localStorage - ${key}`)
               localStorage.setItem(key, value)
             }
           },
           removeItem: (key: string) => {
             if (typeof localStorage !== "undefined") {
-              console.log(`📦 Removing from localStorage - ${key}`)
               localStorage.removeItem(key)
             }
           },
