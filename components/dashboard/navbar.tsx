@@ -1,27 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { LogOut, Menu, X } from "lucide-react"
-import { signOut, getCurrentUser, type AuthUser } from "@/lib/auth"
+import { signOut, type AuthUser } from "@/lib/auth"
 import { useRouter } from "next/navigation"
 
 interface NavbarProps {
+  user?: AuthUser | null
   onMenuToggle?: (open: boolean) => void
   mobileMenuOpen?: boolean
 }
 
-export default function Navbar({ onMenuToggle, mobileMenuOpen = false }: NavbarProps) {
-  const [user, setUser] = useState<AuthUser | null>(null)
+export default function Navbar({ user = null, onMenuToggle, mobileMenuOpen = false }: NavbarProps) {
   const router = useRouter()
-
-  useEffect(() => {
-    const loadUser = async () => {
-      const { user } = await getCurrentUser()
-      setUser(user)
-    }
-    loadUser()
-  }, [])
 
   const handleSignOut = async () => {
     await signOut()

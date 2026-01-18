@@ -16,53 +16,52 @@ export default function DashboardPage() {
       try {
         const supabase = createClient()
         
-        // Intentar obtener la sesión primero
-        const { data: { session } } = await supabase.auth.getSession()
+        // Obtener la sesión primero
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
-        if (session) {
-          // Cargar datos completos del profesor
-          const { data: teacherData } = await supabase
-            .from("teachers")
-            .select("*")
-            .eq("id", session.user.id)
-            .single()
-          
-          setUser(teacherData || session.user)
+        if (sessionError) {
+          console.error("Error obteniendo sesión:", sessionError)
+          throw sessionError
+        }
+
+        if (!session?.user?.id) {
+          // Sin sesión válida, redirigir a login
+          router.push("/auth/login")
+          return
+        }
+
+        // Intentar cargar datos completos del profesor
+        const { data: teacherData, error: teacherError } = await supabase
+          .from("teachers")
+          .select("id, email, full_name")
+          .eq("id", session.user.id)
+          .single()
+
+        if (teacherError) {
+          console.error("Error obteniendo datos del profesor:", teacherError)
+          // Si no hay datos en teachers, crear uno temporal con los datos de auth
+          const tempUser = {
+            id: session.user.id,
+            email: session.user.email,
+            full_name: session.user.user_metadata?.full_name || "Profesor",
+          }
+          setUser(tempUser)
           setLoading(false)
           return
         }
-        
-        // Si no hay sesión, intentar obtener el usuario
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (user) {
-          // Cargar datos completos del profesor
-          const { data: teacherData } = await supabase
-            .from("teachers")
-            .select("*")
-            .eq("id", user.id)
-            .single()
-          
-          setUser(teacherData || user)
-          setLoading(false)
-        } else {
-          // Reintentar una vez después de un pequeño delay
-          if (attempts < 1) {
-            setAttempts(attempts + 1)
-            setTimeout(() => {
-              checkAuth()
-            }, 500)
-          } else {
-            router.push("/auth/login")
-          }
-        }
+
+        setUser(teacherData)
+        setLoading(false)
       } catch (error) {
+        console.error("Error en checkAuth:", error)
         if (attempts < 1) {
+          // Reintentar una sola vez con un delay
           setAttempts(attempts + 1)
           setTimeout(() => {
             checkAuth()
           }, 500)
         } else {
+          // Después de reintentar, redirigir a login
           router.push("/auth/login")
         }
       }
