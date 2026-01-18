@@ -83,7 +83,7 @@ export const getCurrentUser = async () => {
         id: user.id,
         email: user.email!,
         full_name: teacher.full_name,
-        role: teacher.role || 'teacher',
+        role: (teacher?.role as any) || 'teacher',
       } as AuthUser,
       error: null,
     }

@@ -22,7 +22,8 @@ export default function Sidebar({
   user = null
 }: SidebarProps) {
   const router = useRouter()
-  const isCoordinator = user?.role === "coordinator" || user?.role === "admin"
+  const userRole = user?.role || 'teacher'
+  const isCoordinator = userRole === "coordinator" || userRole === "admin"
 
   const handleSignOut = async () => {
     await signOut()

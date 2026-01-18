@@ -23,8 +23,9 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ user }: DashboardClientProps) {
+  const userRole = user?.role || 'teacher'
   const [activeSection, setActiveSection] = useState(
-    user?.role === "coordinator" || user?.role === "admin" ? "coordinador" : "grupos"
+    userRole === "coordinator" || userRole === "admin" ? "coordinador" : "grupos"
   )
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
@@ -99,7 +100,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
   const renderContent = () => {
     // Si es coordinador o admin, mostrar su dashboard especial
-    if ((user?.role === "coordinator" || user?.role === "admin") && activeSection === "coordinador") {
+    if ((userRole === "coordinator" || userRole === "admin") && activeSection === "coordinador") {
       return <CoordinadorDashboard user={user} />
     }
 

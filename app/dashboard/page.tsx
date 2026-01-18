@@ -44,13 +44,18 @@ export default function DashboardPage() {
             id: session.user.id,
             email: session.user.email,
             full_name: session.user.user_metadata?.full_name || "Profesor",
+            role: 'teacher'
           }
           setUser(tempUser)
           setLoading(false)
           return
         }
 
-        setUser(teacherData)
+        const userWithRole = {
+          ...teacherData,
+          role: teacherData?.role || 'teacher'
+        }
+        setUser(userWithRole)
         setLoading(false)
       } catch (error) {
         console.error("Error en checkAuth:", error)
