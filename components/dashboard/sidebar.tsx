@@ -1,6 +1,8 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Users, Calendar, Gift, Plus, CalendarDays, FileSpreadsheet } from "lucide-react"
+import { Users, Calendar, Gift, Plus, CalendarDays, FileSpreadsheet, LogOut } from "lucide-react"
+import { signOut } from "@/lib/auth"
+import { useRouter } from "next/navigation"
 
 interface SidebarProps {
   activeSection: string
@@ -8,6 +10,7 @@ interface SidebarProps {
   isOpen?: boolean
   onClose?: () => void
   isMobile?: boolean
+  user?: { full_name: string; email: string } | null
 }
 
 export default function Sidebar({ 
@@ -15,8 +18,16 @@ export default function Sidebar({
   onSectionChange, 
   isOpen = true,
   onClose,
-  isMobile = false
+  isMobile = false,
+  user = null
 }: SidebarProps) {
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push("/auth/login")
+  }
+
   const menuItems = [
     { id: "grupos", label: "Mis Grupos", icon: Users },
     { id: "asistencia", label: "Asistencia", icon: Calendar },
@@ -43,11 +54,11 @@ export default function Sidebar({
           />
         )}
         <div 
-          className={`fixed left-0 top-16 bottom-0 w-64 bg-white border-r shadow-lg transform transition-transform duration-300 z-40 sm:hidden overflow-y-auto ${
+          className={`fixed left-0 top-16 bottom-0 w-64 bg-white border-r shadow-lg transform transition-transform duration-300 z-40 sm:hidden overflow-y-auto flex flex-col ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="p-4 space-y-2">
+          <div className="p-4 space-y-2 flex-1">
             <Button
               onClick={() => handleItemClick("crear-grupo")}
               className="w-full justify-start text-left"
@@ -68,6 +79,21 @@ export default function Sidebar({
                 <span className="truncate">{item.label}</span>
               </Button>
             ))}
+          </div>
+
+          {/* User info and logout at bottom */}
+          <div className="border-t p-4 space-y-2">
+            <div className="text-sm text-gray-600 text-center py-2">
+              {user?.full_name || "Profesor"}
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleSignOut}
+              className="w-full text-xs justify-start"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Salir
+            </Button>
           </div>
         </div>
       </>

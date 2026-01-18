@@ -126,20 +126,21 @@ export default function DashboardClient({ user }: DashboardClientProps) {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar user={user} onMenuToggle={setMobileMenuOpen} />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0">
         <Sidebar 
           activeSection={activeSection} 
           onSectionChange={setActiveSection}
           isOpen={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
           isMobile={true}
+          user={user}
         />
         <Sidebar 
           activeSection={activeSection} 
           onSectionChange={setActiveSection}
           isMobile={false}
         />
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6">
             {renderContent()}
           </div>
