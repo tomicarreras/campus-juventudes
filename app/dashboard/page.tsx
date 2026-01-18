@@ -16,57 +16,65 @@ export default function DashboardPage() {
       try {
         const supabase = createClient()
         
-        // Obtener la sesión primero
+        // Obtener la sesión
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError) {
           console.error("Error obteniendo sesión:", sessionError)
-          throw sessionError
-        }
-
-        if (!session?.user?.id) {
-          // Sin sesión válida, redirigir a login
           router.push("/auth/login")
           return
         }
 
-        // Intentar cargar datos completos del profesor
-        const { data: teacherData, error: teacherError } = await supabase
-          .from("teachers")
-          .select("id, email, full_name")
-          .eq("id", session.user.id)
-          .single()
-
-        if (teacherError) {
-          console.error("Error obteniendo datos del profesor:", teacherError)
-          // Si no hay datos en teachers, crear uno temporal con los datos de auth
-          const tempUser = {
-            id: session.user.id,
-            email: session.user.email,
-            full_name: session.user.user_metadata?.full_name || "Profesor",
-            role: 'teacher'
-          }
-          setUser(tempUser)
-          setLoading(false)
+        if (!session?.user?.id) {
+          router.push("/auth/login")
           return
         }
 
-        const userWithRole = {
-          ...teacherData,
-          role: teacherData?.role || 'teacher'
+        try {
+          // Intentar cargar datos del profesor
+          const { data: teacherData, error: teacherError } = await supabase
+            .from("teachers")
+            .select("id, email, full_name, role")
+            .eq("id", session.user.id)
+            .single()
+
+          if (teacherError && teacherError.code !== "PGRST116") {
+            throw teacherError
+          }
+
+          if (teacherData) {
+            setUser({
+              ...teacherData,
+              role: teacherData.role || 'teacher'
+            })
+          } else {
+            // Usuario sin datos en teachers - crear temporal
+            setUser({
+              id: session.user.id,
+              email: session.user.email || "",
+              full_name: session.user.user_metadata?.full_name || "Profesor",
+              role: 'teacher'
+            })
+          }
+        } catch (err) {
+          console.error("Error cargar profesor:", err)
+          setUser({
+            id: session.user.id,
+            email: session.user.email || "",
+            full_name: session.user.user_metadata?.full_name || "Profesor",
+            role: 'teacher'
+          })
         }
-        setUser(userWithRole)
+
         setLoading(false)
       } catch (error) {
-        console.error("Error en checkAuth:", error)
+        console.error("Error general:", error)
         if (attempts < 1) {
-          // Reintentar una sola vez con un delay
           setAttempts(attempts + 1)
           setTimeout(() => {
             checkAuth()
           }, 500)
         } else {
-          // Después de reintentar, redirigir a login
           router.push("/auth/login")
         }
       }
