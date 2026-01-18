@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Loader2, ArrowLeft, Save, Calendar, Users } from "lucide-react"
+import { Loader2, ArrowLeft, Save, Calendar, Users, Trash2 } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import { getCurrentUser } from "@/lib/auth"
 import { getTodayDateString } from "@/lib/utils"
@@ -137,6 +137,42 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
     setLoading(false)
   }
 
+  const handleDeleteAttendance = async () => {
+    if (!confirm(`¿Estás seguro de que querés eliminar toda la asistencia de ${group.name} para el ${attendanceDate}?`)) {
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      // Delete all attendance records for this date and group
+      const { error: deleteError } = await supabase
+        .from("attendance")
+        .delete()
+        .eq("group_id", group.id)
+        .eq("date", attendanceDate)
+
+      if (deleteError) throw deleteError
+
+      setSuccess("Asistencia eliminada exitosamente")
+      
+      // Reset attendance records
+      const resetRecords: AttendanceRecord[] = students.map((student) => ({
+        student,
+        present: false,
+        notes: "",
+      }))
+      setAttendanceRecords(resetRecords)
+      setExistingAttendance([])
+    } catch (err: any) {
+      setError(err.message)
+    }
+
+    setLoading(false)
+  }
+
   const presentCount = attendanceRecords.filter((record) => record.present).length
   const totalCount = attendanceRecords.length
 
@@ -255,19 +291,42 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
                 </div>
               ))}
 
-              <Button onClick={handleSaveAttendance} disabled={loading} className="w-full text-sm sm:text-base">
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Guardar Asistencia
-                  </>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full">
+                <Button onClick={handleSaveAttendance} disabled={loading} className="flex-1 text-sm sm:text-base">
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Guardar Asistencia
+                    </>
+                  )}
+                </Button>
+
+                {existingAttendance.length > 0 && (
+                  <Button 
+                    onClick={handleDeleteAttendance} 
+                    disabled={loading}
+                    variant="destructive"
+                    className="flex-1 text-sm sm:text-base"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Eliminando...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Eliminar Asistencia
+                      </>
+                    )}
+                  </Button>
                 )}
-              </Button>
+              </div>
             </div>
           )}
         </CardContent>

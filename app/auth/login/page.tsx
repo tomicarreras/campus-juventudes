@@ -39,7 +39,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <img src="/logo.png" alt="Logo del Sistema" className="h-16 mx-auto mb-2" />
-          <h1 className="text-3xl font-bold text-gray-800">Iniciar Sesión</h1>
+          <h1 className="text-3xl font-bold text-gray-800">¡Bienvenid@!</h1>
         </div>
         <LoginForm />
       </div>
