@@ -13,6 +13,7 @@ import CalendarioAsistencia from "@/components/calendar/calendario-asistencia"
 import DetalleDia from "@/components/calendar/detalle-dia"
 import SeccionCumpleanos from "@/components/birthdays/seccion-cumpleanos"
 import ExportarPlanilla from "@/components/export/exportar-planilla"
+import EstadisticasAsistencia from "@/components/statistics/estadisticas-asistencia"
 import type { Group } from "@/lib/types"
 import { createClient } from "@/lib/supabase/client"
 
@@ -73,6 +74,11 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     setActiveSection("calendario")
   }
 
+  const handleSelectGroupForStatistics = (group: Group) => {
+    setSelectedGroup(group)
+    setActiveSection("estadisticas")
+  }
+
   const handleViewAttendanceHistory = (group: Group) => {
     setSelectedGroup(group)
     setActiveSection("historial-asistencia")
@@ -112,6 +118,15 @@ export default function DashboardClient({ user }: DashboardClientProps) {
         ) : null
       case "cumpleanos":
         return <SeccionCumpleanos />
+      case "estadisticas":
+        return selectedGroup ? (
+          <EstadisticasAsistencia group={selectedGroup} onBack={handleBackToGroups} />
+        ) : (
+          <div>
+            <p className="mb-4">Selecciona un grupo para ver las estadísticas</p>
+            <ListaGrupos onSelectGroup={handleSelectGroupForStatistics} refreshTrigger={refreshTrigger} />
+          </div>
+        )
       case "exportar":
         return loadingGroups ? (
           <div>Cargando grupos...</div>

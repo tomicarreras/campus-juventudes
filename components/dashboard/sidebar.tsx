@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Users, Calendar, Gift, Plus, CalendarDays, FileSpreadsheet, LogOut } from "lucide-react"
+import { Users, Calendar, Gift, Plus, CalendarDays, FileSpreadsheet, LogOut, BarChart3 } from "lucide-react"
 import { signOut } from "@/lib/auth"
 import { useRouter } from "next/navigation"
 
@@ -33,6 +33,7 @@ export default function Sidebar({
     { id: "asistencia", label: "Asistencia", icon: Calendar },
     { id: "calendario", label: "Calendario", icon: CalendarDays },
     { id: "cumpleanos", label: "Cumpleaños", icon: Gift },
+    { id: "estadisticas", label: "Estadísticas", icon: BarChart3 },
     { id: "exportar", label: "Exportar Planillas", icon: FileSpreadsheet },
   ]
 

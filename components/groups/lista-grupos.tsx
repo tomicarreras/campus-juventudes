@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import EditarGrupoForm from "@/components/groups/editar-grupo-form"
 import { toast } from "@/hooks/use-toast"
 import type { Group } from "@/lib/types"
+import { Copy } from "lucide-react"
 
 interface ListaGruposProps {
   refreshTrigger?: number
@@ -18,6 +19,7 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
   const [loading, setLoading] = useState(true)
   const [editingGroup, setEditingGroup] = useState<Group | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [duplicating, setDuplicating] = useState<string | null>(null)
 
   // Fetch groups
   const fetchGroups = async () => {
@@ -45,6 +47,75 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
     } else {
       toast({ title: "Grupo borrado", description: "El grupo fue eliminado correctamente" })
       fetchGroups()
+    }
+  }
+
+  const handleDuplicate = async (groupId: string) => {
+    setDuplicating(groupId)
+    const supabase = createClient()
+    
+    try {
+      // Obtener el grupo original
+      const { data: originalGroup, error: fetchError } = await supabase
+        .from("groups")
+        .select("*")
+        .eq("id", groupId)
+        .single()
+
+      if (fetchError || !originalGroup) throw new Error("No se pudo obtener el grupo")
+
+      // Crear nuevo grupo con nombre copiado
+      const newGroupName = `${originalGroup.name} (Copia)`
+      const { data: newGroup, error: createError } = await supabase
+        .from("groups")
+        .insert([
+          {
+            name: newGroupName,
+            description: originalGroup.description,
+            place: originalGroup.place,
+            schedule_date: originalGroup.schedule_date,
+            schedule_time: originalGroup.schedule_time,
+            teacher_id: originalGroup.teacher_id,
+          },
+        ])
+        .select()
+        .single()
+
+      if (createError || !newGroup) throw new Error("No se pudo crear el grupo duplicado")
+
+      // Obtener todos los estudiantes del grupo original
+      const { data: students, error: studentsError } = await supabase
+        .from("students")
+        .select("*")
+        .eq("group_id", groupId)
+
+      if (studentsError) throw new Error("No se pudo obtener los estudiantes")
+
+      // Copiar estudiantes al nuevo grupo
+      if (students && students.length > 0) {
+        const newStudents = students.map(({ id, created_at, updated_at, ...student }) => ({
+          ...student,
+          group_id: newGroup.id,
+        }))
+
+        const { error: insertError } = await supabase.from("students").insert(newStudents)
+
+        if (insertError) throw new Error("No se pudieron copiar los estudiantes")
+      }
+
+      toast({
+        title: "Grupo duplicado",
+        description: `${newGroupName} ha sido creado correctamente con ${students?.length || 0} estudiantes`,
+      })
+      fetchGroups()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo duplicar el grupo",
+        variant: "destructive",
+      })
+    } finally {
+      setDuplicating(null)
     }
   }
 
@@ -86,6 +157,22 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
                 className="flex-1 sm:flex-none text-xs sm:text-sm"
               >
                 Editar
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => handleDuplicate(group.id)}
+                disabled={duplicating === group.id}
+                className="flex-1 sm:flex-none text-xs sm:text-sm"
+              >
+                {duplicating === group.id ? (
+                  "Duplicando..."
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-1" />
+                    <span className="hidden sm:inline">Duplicar</span>
+                  </>
+                )}
               </Button>
               <Button 
                 size="sm" 
