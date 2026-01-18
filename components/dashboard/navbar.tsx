@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X } from "lucide-react"
-import { getCurrentUser, type AuthUser } from "@/lib/auth"
+import { LogOut, Menu, X } from "lucide-react"
+import { signOut, getCurrentUser, type AuthUser } from "@/lib/auth"
+import { useRouter } from "next/navigation"
 
 interface NavbarProps {
   onMenuToggle?: (open: boolean) => void
@@ -12,6 +13,7 @@ interface NavbarProps {
 export default function Navbar({ onMenuToggle }: NavbarProps) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const loadUser = async () => {
@@ -20,6 +22,11 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
     }
     loadUser()
   }, [])
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push("/auth/login")
+  }
 
   const toggleMobileMenu = () => {
     const newState = !mobileMenuOpen
@@ -37,6 +44,18 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-4">
+            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline truncate max-w-[200px]">
+              {user?.full_name || "Profesor"}
+            </span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSignOut}
+              className="hidden sm:flex text-xs sm:text-base"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="ml-2 hidden sm:inline">Salir</span>
+            </Button>
             <Button 
               variant="ghost" 
               size="icon" 

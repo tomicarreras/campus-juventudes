@@ -20,7 +20,14 @@ export default function DashboardPage() {
         const { data: { session } } = await supabase.auth.getSession()
         
         if (session) {
-          setUser(session.user)
+          // Cargar datos completos del profesor
+          const { data: teacherData } = await supabase
+            .from("teachers")
+            .select("*")
+            .eq("id", session.user.id)
+            .single()
+          
+          setUser(teacherData || session.user)
           setLoading(false)
           return
         }
@@ -29,7 +36,14 @@ export default function DashboardPage() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          setUser(user)
+          // Cargar datos completos del profesor
+          const { data: teacherData } = await supabase
+            .from("teachers")
+            .select("*")
+            .eq("id", user.id)
+            .single()
+          
+          setUser(teacherData || user)
           setLoading(false)
         } else {
           // Reintentar una vez después de un pequeño delay
