@@ -1,11 +1,14 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { LandingPage } from "@/components/landing/landing-page"
 
 export default function HomePage() {
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(true)
+  const [hasSession, setHasSession] = useState(false)
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -15,18 +18,27 @@ export default function HomePage() {
         if (session) {
           router.push("/dashboard")
         } else {
-          router.push("/auth/login")
+          setHasSession(false)
+          setIsLoading(false)
         }
       } catch (error) {
-        router.push("/auth/login")
+        setHasSession(false)
+        setIsLoading(false)
       }
     }
     checkAuth()
   }, [router])
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <h1 className="text-2xl font-bold mb-4">Cargando...</h1>
-    </div>
-  )
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-900">
+        <div className="text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-slate-700 border-t-blue-500 rounded-full mb-4 mx-auto"></div>
+          <h1 className="text-xl font-bold text-white">Cargando...</h1>
+        </div>
+      </div>
+    )
+  }
+
+  return <LandingPage />
 }
