@@ -47,9 +47,9 @@ export function LandingPage() {
               <Image
                 src="/logo.png"
                 alt="campusjuventudes"
-                width={50}
-                height={50}
-                className="rounded-lg"
+                width={150}
+                height={150}
+                className=""
               />
             </div>
             <Button
@@ -75,9 +75,9 @@ export function LandingPage() {
               <Image
                 src="/logo.png"
                 alt="campusjuventudes"
-                width={200}
-                height={200}
-                className="rounded-2xl shadow-2xl"
+                width={400}
+                height={400}
+                className=""
               />
             </div>
 
