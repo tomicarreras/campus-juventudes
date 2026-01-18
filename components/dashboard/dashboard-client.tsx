@@ -14,6 +14,7 @@ import DetalleDia from "@/components/calendar/detalle-dia"
 import SeccionCumpleanos from "@/components/birthdays/seccion-cumpleanos"
 import ExportarPlanilla from "@/components/export/exportar-planilla"
 import EstadisticasAsistencia from "@/components/statistics/estadisticas-asistencia"
+import CoordinadorDashboard from "@/components/dashboard/coordinador-dashboard"
 import type { Group } from "@/lib/types"
 import { createClient } from "@/lib/supabase/client"
 
@@ -22,7 +23,9 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ user }: DashboardClientProps) {
-  const [activeSection, setActiveSection] = useState("grupos")
+  const [activeSection, setActiveSection] = useState(
+    user?.role === "coordinator" || user?.role === "admin" ? "coordinador" : "grupos"
+  )
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -95,6 +98,11 @@ export default function DashboardClient({ user }: DashboardClientProps) {
   }
 
   const renderContent = () => {
+    // Si es coordinador o admin, mostrar su dashboard especial
+    if ((user?.role === "coordinator" || user?.role === "admin") && activeSection === "coordinador") {
+      return <CoordinadorDashboard user={user} />
+    }
+
     switch (activeSection) {
       case "crear-grupo":
         return <CrearGrupoForm onGroupCreated={handleGroupCreated} />

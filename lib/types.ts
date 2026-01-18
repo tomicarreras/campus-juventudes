@@ -2,6 +2,7 @@ export interface Teacher {
   id: string
   email: string
   full_name: string
+  role: 'teacher' | 'coordinator' | 'admin'
   created_at: string
   updated_at: string
 }

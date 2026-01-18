@@ -4,6 +4,7 @@ export interface AuthUser {
   id: string
   email: string
   full_name: string
+  role: 'teacher' | 'coordinator' | 'admin'
 }
 
 export const signUp = async (email: string, password: string, fullName: string) => {
@@ -82,6 +83,7 @@ export const getCurrentUser = async () => {
         id: user.id,
         email: user.email!,
         full_name: teacher.full_name,
+        role: teacher.role || 'teacher',
       } as AuthUser,
       error: null,
     }

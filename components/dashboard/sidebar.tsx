@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Users, Calendar, Gift, Plus, CalendarDays, FileSpreadsheet, LogOut, BarChart3 } from "lucide-react"
+import { Users, Calendar, Gift, Plus, CalendarDays, FileSpreadsheet, LogOut, BarChart3, Gauge } from "lucide-react"
 import { signOut } from "@/lib/auth"
 import { useRouter } from "next/navigation"
 
@@ -10,7 +10,7 @@ interface SidebarProps {
   isOpen?: boolean
   onClose?: () => void
   isMobile?: boolean
-  user?: { full_name: string; email: string } | null
+  user?: { full_name: string; email: string; role?: string } | null
 }
 
 export default function Sidebar({ 
@@ -22,13 +22,18 @@ export default function Sidebar({
   user = null
 }: SidebarProps) {
   const router = useRouter()
+  const isCoordinator = user?.role === "coordinator" || user?.role === "admin"
 
   const handleSignOut = async () => {
     await signOut()
     router.push("/auth/login")
   }
 
-  const menuItems = [
+  const menuItems = isCoordinator ? [
+    { id: "coordinador", label: "Panel del Coordinador", icon: Gauge },
+    { id: "grupos", label: "Todos los Grupos", icon: Users },
+    { id: "estadisticas", label: "Estadísticas Globales", icon: BarChart3 },
+  ] : [
     { id: "grupos", label: "Mis Grupos", icon: Users },
     { id: "asistencia", label: "Asistencia", icon: Calendar },
     { id: "calendario", label: "Calendario", icon: CalendarDays },
@@ -60,14 +65,16 @@ export default function Sidebar({
           }`}
         >
           <div className="p-4 space-y-2 flex-1">
-            <Button
-              onClick={() => handleItemClick("crear-grupo")}
-              className="w-full justify-start text-left"
-              variant={activeSection === "crear-grupo" ? "default" : "ghost"}
-            >
-              <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
-              <span className="truncate">Crear Grupo</span>
-            </Button>
+            {!isCoordinator && (
+              <Button
+                onClick={() => handleItemClick("crear-grupo")}
+                className="w-full justify-start text-left"
+                variant={activeSection === "crear-grupo" ? "default" : "ghost"}
+              >
+                <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">Crear Grupo</span>
+              </Button>
+            )}
 
             {menuItems.map((item) => (
               <Button
@@ -87,6 +94,11 @@ export default function Sidebar({
             <div className="text-sm text-gray-600 text-center py-2">
               {user?.full_name || "Profesor"}
             </div>
+            {isCoordinator && (
+              <div className="text-xs text-blue-600 text-center bg-blue-50 p-2 rounded">
+                Coordinador
+              </div>
+            )}
             <Button
               variant="outline"
               onClick={handleSignOut}
@@ -105,14 +117,16 @@ export default function Sidebar({
   return (
     <div className="hidden sm:flex sm:flex-col w-64 bg-gray-50 border-r sticky top-16 h-[calc(100vh-4rem)]">
       <div className="p-4 space-y-2 overflow-y-auto flex-1">
-        <Button
-          onClick={() => onSectionChange("crear-grupo")}
-          className="w-full justify-start"
-          variant={activeSection === "crear-grupo" ? "default" : "ghost"}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Crear Grupo
-        </Button>
+        {!isCoordinator && (
+          <Button
+            onClick={() => onSectionChange("crear-grupo")}
+            className="w-full justify-start"
+            variant={activeSection === "crear-grupo" ? "default" : "ghost"}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Crear Grupo
+          </Button>
+        )}
 
         {menuItems.map((item) => (
           <Button
@@ -125,6 +139,26 @@ export default function Sidebar({
             {item.label}
           </Button>
         ))}
+      </div>
+
+      {/* User info and logout at bottom */}
+      <div className="border-t p-4 space-y-2">
+        <div className="text-sm text-gray-600 text-center py-2">
+          {user?.full_name || "Profesor"}
+        </div>
+        {isCoordinator && (
+          <div className="text-xs text-blue-600 text-center bg-blue-50 p-2 rounded">
+            Coordinador
+          </div>
+        )}
+        <Button
+          variant="outline"
+          onClick={handleSignOut}
+          className="w-full text-xs justify-start"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Salir
+        </Button>
       </div>
     </div>
   )
