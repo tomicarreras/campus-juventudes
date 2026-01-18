@@ -1,13 +1,13 @@
 'use client'
 
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { 
-  CheckCircle2, 
   Users, 
   Calendar, 
-  BarChart3, 
-  Zap,
+  Download,
+  Gift,
   ArrowRight
 } from 'lucide-react'
 
@@ -18,22 +18,22 @@ export function LandingPage() {
     {
       icon: Users,
       title: 'Gestión de Estudiantes',
-      description: 'Organiza y administra tus grupos de estudiantes de forma sencilla',
+      description: 'Organizá y administrá tus grupos de estudiantes de forma sencilla',
     },
     {
       icon: Calendar,
       title: 'Control de Asistencia',
-      description: 'Registra la asistencia de tus estudiantes en tiempo real',
+      description: 'Registra la asistencia de tus estudiantes de manera rápida y eficiente',
     },
     {
-      icon: BarChart3,
-      title: 'Reportes y Estadísticas',
-      description: 'Visualiza datos detallados sobre asistencia y desempeño',
+      icon: Gift,
+      title: 'Seguimiento de Cumpleaños',
+      description: 'Visualiza los cumpleaños de tus alumnos para que nunca los olvides',
     },
     {
-      icon: Zap,
-      title: 'Interfaz Intuitiva',
-      description: 'Diseño moderno y fácil de usar para toda la comunidad educativa',
+      icon: Download,
+      title: 'Exportar Planillas',
+      description: 'Descargá y exportá las planillas de asistencia en cualquier momento',
     },
   ]
 
@@ -43,10 +43,14 @@ export function LandingPage() {
       <nav className="fixed top-0 w-full z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center font-bold text-lg">
-                CJ
-              </div>
+            <div className="flex items-center space-x-3">
+              <Image
+                src="/logo.png"
+                alt="campusjuventudes"
+                width={40}
+                height={40}
+                className="rounded-lg"
+              />
               <span className="font-bold text-lg hidden sm:inline">campusjuventudes</span>
             </div>
             <Button
@@ -69,9 +73,13 @@ export function LandingPage() {
           <div className="text-center">
             {/* Logo grande */}
             <div className="mb-8 flex justify-center">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center">
-                <span className="text-5xl font-bold">CJ</span>
-              </div>
+              <Image
+                src="/logo.png"
+                alt="campusjuventudes"
+                width={120}
+                height={120}
+                className="rounded-2xl shadow-2xl"
+              />
             </div>
 
             {/* Título y descripción */}
@@ -79,10 +87,10 @@ export function LandingPage() {
               campusjuventudes
             </h1>
             <p className="text-xl sm:text-2xl text-slate-300 mb-4 max-w-2xl mx-auto">
-              Plataforma moderna para la gestión de asistencia escolar
+              Plataforma para profesores
             </p>
             <p className="text-base sm:text-lg text-slate-400 mb-8 max-w-2xl mx-auto">
-              Simplifica el control de asistencia, organiza tus grupos y obtén reportes detallados en un solo lugar
+              Controla la asistencia, organiza tus grupos y accede a reportes detallados de forma sencilla
             </p>
 
             {/* CTA Button */}
@@ -102,9 +110,9 @@ export function LandingPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Características Principales</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Características principales</h2>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Todo lo que necesitas para una gestión educativa eficiente y moderna
+              Conocé un poco la plataforma
             </p>
           </div>
 
@@ -141,20 +149,26 @@ export function LandingPage() {
             {/* Decorative element */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl -z-10"></div>
 
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4">¿Qué puedes hacer?</h2>
+              <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+                Todas las herramientas que necesitas para una gestión educativa completa
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h2 className="text-4xl font-bold mb-8">¿Por qué elegir campusjuventudes?</h2>
                 <ul className="space-y-4">
                   {[
-                    'Interfaz intuitiva y fácil de usar',
-                    'Control de asistencia en tiempo real',
-                    'Reportes detallados y exportables',
-                    'Gestión completa de grupos',
-                    'Seguridad y privacidad garantizada',
-                    'Soporte profesional'
+                    'Controlar la asistencia en tiempo real',
+                    'Visualizar los cumpleaños de tus alumnos',
+                    'Exportar planillas de asistencia',
+                    'Gestionar múltiples grupos de estudiantes',
                   ].map((benefit, index) => (
                     <li key={index} className="flex items-center text-slate-200">
-                      <CheckCircle2 className="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" />
+                      <div className="w-6 h-6 rounded-full bg-blue-500/30 flex items-center justify-center mr-3 flex-shrink-0">
+                        <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                      </div>
                       {benefit}
                     </li>
                   ))}
@@ -180,10 +194,10 @@ export function LandingPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            ¿Listo para comenzar?
+            Comenzá ahora
           </h2>
           <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-            Únete a cientos de instituciones educativas que ya confían en campusjuventudes
+            ¡Registrate y empezá a gestionar la asistencia de tus grupos!
           </p>
           <Button
             onClick={() => router.push('/auth/login')}
@@ -199,57 +213,32 @@ export function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            {/* Brand */}
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center font-bold">
-                  CJ
-                </div>
-                <span className="font-bold">campusjuventudes</span>
-              </div>
-              <p className="text-slate-400 text-sm">
-                Gestión de asistencia para la comunidad educativa
+          <div className="text-center">
+            <div className="mb-6">
+              <p className="text-slate-400 mb-4">
+                Hecho con ❤️ por{' '}
+                <a 
+                  href="www.campusjuventudes.com.ar/tomi" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition font-semibold"
+                >
+                  tomi
+                </a>
+              </p>
+              <p className="text-slate-400">
+                ¿Preguntas? Contactanos en{' '}
+                <a 
+                  href="mailto:contacto@campusjuventudes.com.ar"
+                  className="text-blue-400 hover:text-blue-300 transition font-semibold"
+                >
+                  contacto@campusjuventudes.com.ar
+                </a>
               </p>
             </div>
 
-            {/* Links */}
-            <div>
-              <h4 className="font-semibold mb-4">Producto</h4>
-              <ul className="space-y-2 text-slate-400 text-sm">
-                <li><a href="#" className="hover:text-white transition">Características</a></li>
-                <li><a href="#" className="hover:text-white transition">Precios</a></li>
-                <li><a href="#" className="hover:text-white transition">Seguridad</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Empresa</h4>
-              <ul className="space-y-2 text-slate-400 text-sm">
-                <li><a href="#" className="hover:text-white transition">Acerca de</a></li>
-                <li><a href="#" className="hover:text-white transition">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition">Contacto</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-slate-400 text-sm">
-                <li><a href="#" className="hover:text-white transition">Privacidad</a></li>
-                <li><a href="#" className="hover:text-white transition">Términos</a></li>
-                <li><a href="#" className="hover:text-white transition">Cookies</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-700/50 pt-8">
-            <div className="flex flex-col md:flex-row justify-between items-center text-slate-400 text-sm">
-              <p>&copy; 2026 campusjuventudes. Todos los derechos reservados.</p>
-              <div className="flex space-x-6 mt-4 md:mt-0">
-                <a href="#" className="hover:text-white transition">Twitter</a>
-                <a href="#" className="hover:text-white transition">LinkedIn</a>
-                <a href="#" className="hover:text-white transition">GitHub</a>
-              </div>
+            <div className="border-t border-slate-700/50 pt-8">
+              <p className="text-slate-500 text-sm">&copy; 2026 campusjuventudes.</p>
             </div>
           </div>
         </div>
