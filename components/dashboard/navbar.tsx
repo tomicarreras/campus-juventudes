@@ -48,15 +48,6 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
               {user?.full_name || "Profesor"}
             </span>
             <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleSignOut}
-              className="hidden sm:flex text-xs sm:text-base"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="ml-2 hidden sm:inline">Salir</span>
-            </Button>
-            <Button 
               variant="ghost" 
               size="icon" 
               onClick={toggleMobileMenu}
@@ -80,7 +71,7 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
             <Button
               variant="outline"
               onClick={handleSignOut}
-              className="w-full text-xs"
+              className="w-full mx-2 text-xs"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Salir

@@ -76,8 +76,8 @@ export default function Sidebar({
 
   // Desktop: Fixed sidebar
   return (
-    <div className="hidden sm:block w-64 bg-gray-50 border-r p-4 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
-      <div className="space-y-2">
+    <div className="hidden sm:flex sm:flex-col w-64 bg-gray-50 border-r sticky top-16 h-[calc(100vh-4rem)]">
+      <div className="p-4 space-y-2 overflow-y-auto flex-1">
         <Button
           onClick={() => onSectionChange("crear-grupo")}
           className="w-full justify-start"
