@@ -8,11 +8,11 @@ import { useRouter } from "next/navigation"
 
 interface NavbarProps {
   onMenuToggle?: (open: boolean) => void
+  mobileMenuOpen?: boolean
 }
 
-export default function Navbar({ onMenuToggle }: NavbarProps) {
+export default function Navbar({ onMenuToggle, mobileMenuOpen = false }: NavbarProps) {
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -30,7 +30,6 @@ export default function Navbar({ onMenuToggle }: NavbarProps) {
 
   const toggleMobileMenu = () => {
     const newState = !mobileMenuOpen
-    setMobileMenuOpen(newState)
     onMenuToggle?.(newState)
   }
 

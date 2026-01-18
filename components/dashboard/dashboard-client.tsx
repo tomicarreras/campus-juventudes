@@ -125,7 +125,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar user={user} onMenuToggle={setMobileMenuOpen} />
+      <Navbar user={user} onMenuToggle={setMobileMenuOpen} mobileMenuOpen={mobileMenuOpen} />
       <div className="flex flex-1 min-h-0">
         <Sidebar 
           activeSection={activeSection} 
