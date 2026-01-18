@@ -90,7 +90,10 @@ export default function SeleccionarGrupo({ onSelectGroup }: SeleccionarGrupoProp
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4 flex-shrink-0" />
-                  {new Date(group.schedule_date).toLocaleDateString("es-AR")}
+                  {(() => {
+                    const [year, month, day] = group.schedule_date.split("-").map(Number)
+                    return new Date(year, month - 1, day).toLocaleDateString("es-AR")
+                  })()}
                 </div>
                 {group.schedule_time && (
                   <div className="flex items-center gap-1">

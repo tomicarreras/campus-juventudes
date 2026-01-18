@@ -146,11 +146,11 @@ export function LandingPage() {
             ¡Registrate y empezá a gestionar la asistencia de tus grupos!
           </p>
           <Button
-            onClick={() => router.push('/auth/login')}
+            onClick={() => router.push('/auth/registro')}
             size="lg"
             className="bg-slate-700 hover:bg-slate-800 text-white text-lg px-8 py-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
           >
-            Registrarse
+            Registrate
             <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
         </div>

@@ -26,7 +26,8 @@ export default function SeccionCumpleanos() {
 
   const calculateAge = (birthDate: string) => {
     const today = new Date()
-    const birth = new Date(birthDate)
+    const [year, month, day] = birthDate.split("-").map(Number)
+    const birth = new Date(year, month - 1, day)
     let age = today.getFullYear() - birth.getFullYear()
 
     // Check if birthday hasn't occurred this year yet
@@ -109,7 +110,8 @@ export default function SeccionCumpleanos() {
   }, [])
 
   const formatBirthDate = (dateStr: string) => {
-    const date = new Date(dateStr)
+    const [year, month, day] = dateStr.split("-").map(Number)
+    const date = new Date(year, month - 1, day)
     return date.toLocaleDateString("es-AR", {
       day: "numeric",
       month: "long",

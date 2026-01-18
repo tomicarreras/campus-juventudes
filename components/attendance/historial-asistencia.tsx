@@ -115,7 +115,10 @@ export default function HistorialAsistencia({ group, onBack, onViewDay }: Histor
                 <div key={summary.date} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-4">
                     <div>
-                      <h4 className="font-medium">{new Date(summary.date).toLocaleDateString("es-AR")}</h4>
+                      <h4 className="font-medium">{(() => {
+                        const [year, month, day] = summary.date.split("-").map(Number)
+                        return new Date(year, month - 1, day).toLocaleDateString("es-AR")
+                      })()}</h4>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <Users className="h-4 w-4" />
                         <span>Total: {summary.total_students}</span>

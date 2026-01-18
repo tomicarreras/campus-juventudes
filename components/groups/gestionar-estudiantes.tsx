@@ -278,7 +278,10 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
         <div>
           <h2 className="text-2xl font-bold">{group.name}</h2>
           <p className="text-gray-600">
-            {group.place} - {new Date(group.schedule_date).toLocaleDateString("es-AR")}
+            {group.place} - {(() => {
+              const [year, month, day] = group.schedule_date.split("-").map(Number)
+              return new Date(year, month - 1, day).toLocaleDateString("es-AR")
+            })()}
           </p>
         </div>
       </div>
@@ -518,7 +521,10 @@ export default function GestionarEstudiantes({ group, onBack }: GestionarEstudia
                       <span>{student.email}</span>
                       <span>DNI: {student.national_id}</span>
                       {student.birth_date && (
-                        <span>Nació: {new Date(student.birth_date).toLocaleDateString("es-AR")}</span>
+                        <span>Nació: {(() => {
+                          const [year, month, day] = student.birth_date.split("-").map(Number)
+                          return new Date(year, month - 1, day).toLocaleDateString("es-AR")
+                        })()}</span>
                       )}
                     </div>
                   </div>

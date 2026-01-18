@@ -150,7 +150,10 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
         <div className="min-w-0">
           <h2 className="text-xl sm:text-2xl font-bold truncate">{group.name}</h2>
           <p className="text-xs sm:text-sm text-gray-600 truncate">
-            {group.place} - {new Date(group.schedule_date).toLocaleDateString("es-AR")}
+            {group.place} - {(() => {
+              const [year, month, day] = group.schedule_date.split("-").map(Number)
+              return new Date(year, month - 1, day).toLocaleDateString("es-AR")
+            })()}
           </p>
         </div>
       </div>

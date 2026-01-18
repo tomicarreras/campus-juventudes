@@ -9,7 +9,10 @@ export function exportStudentsToCSV(students: Student[], groupName: string): voi
     student.full_name,
     student.email,
     student.national_id,
-    student.birth_date ? new Date(student.birth_date).toLocaleDateString("es-AR") : "",
+    student.birth_date ? (() => {
+      const [year, month, day] = student.birth_date.split("-").map(Number)
+      return new Date(year, month - 1, day).toLocaleDateString("es-AR")
+    })() : "",
   ])
 
   const csvContent = [
