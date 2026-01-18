@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { LogOut, Menu, X } from "lucide-react"
 import { signOut, getCurrentUser, type AuthUser } from "@/lib/auth"
 import { useRouter } from "next/navigation"
-import { ThemeToggle } from "@/components/theme-toggle"
 
 interface NavbarProps {
   onMenuToggle?: (open: boolean) => void
@@ -47,7 +46,6 @@ export default function Navbar({ onMenuToggle, mobileMenuOpen = false }: NavbarP
             <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline truncate max-w-[200px]">
               {user?.full_name || "Profesor"}
             </span>
-            <ThemeToggle />
             <Button 
               variant="outline" 
               size="sm" 
