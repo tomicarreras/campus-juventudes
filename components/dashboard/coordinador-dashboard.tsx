@@ -37,14 +37,16 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
       try {
         const supabase = createClient()
 
-        // Traer todos los profesores (excepto coordinadores/admins)
+        // Traer todos los profesores (role = 'teacher' solamente, no coordinadores)
         const { data: teacherData, error: teacherError } = await supabase
           .from("teachers")
           .select("*")
           .eq("role", "teacher")
           .order("full_name")
 
-        if (teacherError) throw teacherError
+        if (teacherError && teacherError.code !== "PGRST116") {
+          console.error("Teacher error:", teacherError)
+        }
 
         // Traer todos los grupos
         const { data: groupData, error: groupError } = await supabase
@@ -52,7 +54,9 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
           .select("*")
           .order("name")
 
-        if (groupError) throw groupError
+        if (groupError && groupError.code !== "PGRST116") {
+          console.error("Group error:", groupError)
+        }
 
         // Traer todos los estudiantes
         const { data: studentData, error: studentError } = await supabase
@@ -60,27 +64,36 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
           .select("*")
           .order("full_name")
 
-        if (studentError) throw studentError
+        if (studentError && studentError.code !== "PGRST116") {
+          console.error("Student error:", studentError)
+        }
 
         // Traer todas las asistencias
         const { data: attendanceData, error: attendanceError } = await supabase
           .from("attendance")
           .select("*")
 
-        if (attendanceError) throw attendanceError
+        if (attendanceError && attendanceError.code !== "PGRST116") {
+          console.error("Attendance error:", attendanceError)
+        }
 
-        setGroups(groupData || [])
-        setStudents(studentData || [])
+        const teachersArray = teacherData || []
+        const groupsArray = groupData || []
+        const studentsArray = studentData || []
+        const attendanceArray = attendanceData || []
+
+        setGroups(groupsArray)
+        setStudents(studentsArray)
 
         // Calcular stats por profesor
-        const teacherStats: TeacherStats[] = (teacherData || []).map((teacher) => ({
+        const teacherStats: TeacherStats[] = teachersArray.map((teacher) => ({
           teacher,
-          groupCount: (groupData || []).filter((g) => g.teacher_id === teacher.id).length,
-          studentCount: (studentData || []).filter((s) =>
-            (groupData || []).some((g) => g.id === s.group_id && g.teacher_id === teacher.id)
+          groupCount: groupsArray.filter((g) => g.teacher_id === teacher.id).length,
+          studentCount: studentsArray.filter((s) =>
+            groupsArray.some((g) => g.id === s.group_id && g.teacher_id === teacher.id)
           ).length,
-          totalAttendance: (attendanceData || []).filter((a) =>
-            (groupData || []).some((g) => g.id === a.group_id && g.teacher_id === teacher.id)
+          totalAttendance: attendanceArray.filter((a) =>
+            groupsArray.some((g) => g.id === a.group_id && g.teacher_id === teacher.id)
           ).length,
         }))
 
@@ -88,10 +101,10 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
 
         // Stats generales
         setStats({
-          totalTeachers: teacherData?.length || 0,
-          totalGroups: groupData?.length || 0,
-          totalStudents: studentData?.length || 0,
-          totalAttendanceRecords: attendanceData?.length || 0,
+          totalTeachers: teachersArray.length,
+          totalGroups: groupsArray.length,
+          totalStudents: studentsArray.length,
+          totalAttendanceRecords: attendanceArray.length,
         })
 
         setLoading(false)
