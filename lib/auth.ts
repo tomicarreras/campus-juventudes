@@ -95,7 +95,7 @@ export const getCurrentUser = async () => {
 export const resetPassword = async (email: string) => {
   try {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
+      redirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/auth/callback`,
     })
 
     if (error) throw error
