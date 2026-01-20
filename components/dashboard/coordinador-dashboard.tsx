@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Loader2, Users, BookOpen, TrendingUp } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { getAdminDashboardData } from "@/lib/admin-actions"
 import type { Teacher, Group, Student, Attendance } from "@/lib/types"
 
 interface CoordinadorDashboardProps {
@@ -35,50 +36,18 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
   useEffect(() => {
     const loadData = async () => {
       try {
-        const supabase = createClient()
+        const result = await getAdminDashboardData()
 
-        // Traer todos los profesores (excluyendo solo admin)
-        const { data: teacherData, error: teacherError } = await supabase
-          .from("teachers")
-          .select("*")
-          .neq("role", "admin")
-          .order("full_name")
-
-        console.log("Teacher data:", teacherData, "Error:", teacherError)
-
-        // Traer todos los grupos
-        const { data: groupData, error: groupError } = await supabase
-          .from("groups")
-          .select("*")
-          .order("name")
-
-        if (groupError && groupError.code !== "PGRST116") {
-          console.error("Group error:", groupError)
+        if (result.error) {
+          console.error("Error:", result.error)
+          setLoading(false)
+          return
         }
 
-        // Traer todos los estudiantes
-        const { data: studentData, error: studentError } = await supabase
-          .from("students")
-          .select("*")
-          .order("full_name")
-
-        if (studentError && studentError.code !== "PGRST116") {
-          console.error("Student error:", studentError)
-        }
-
-        // Traer todas las asistencias
-        const { data: attendanceData, error: attendanceError } = await supabase
-          .from("attendance")
-          .select("*")
-
-        if (attendanceError && attendanceError.code !== "PGRST116") {
-          console.error("Attendance error:", attendanceError)
-        }
-
-        const teachersArray = teacherData || []
-        const groupsArray = groupData || []
-        const studentsArray = studentData || []
-        const attendanceArray = attendanceData || []
+        const teachersArray = result.teachers || []
+        const groupsArray = result.groups || []
+        const studentsArray = result.students || []
+        const attendanceArray = result.attendance || []
 
         console.log("Load data - Teachers:", teachersArray.length, teachersArray)
         console.log("Load data - Groups:", groupsArray.length, groupsArray)
