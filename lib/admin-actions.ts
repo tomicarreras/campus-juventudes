@@ -13,18 +13,28 @@ export const getAdminDashboardData = async () => {
       return { error: "No autenticado" }
     }
 
+    console.log("Admin check - User ID:", user.id, "User email:", user.email)
+
     // Traer el rol del usuario desde la BD
     const { data: userData, error: userError } = await supabase
       .from("teachers")
-      .select("role")
+      .select("id, email, role")
       .eq("id", user.id)
       .single()
 
-    if (userError || userData?.role !== "admin") {
-      return { error: "No tienes permisos" }
+    console.log("Admin check - User data:", userData, "Error:", userError)
+
+    if (userError) {
+      return { error: `No se encontró el usuario: ${userError.message}` }
     }
 
-    // Si es admin, traer todos los datos (el server bypass RLS automáticamente)
+    if (!userData || userData.role !== "admin") {
+      return { error: `No tienes permisos. Tu rol es: ${userData?.role || 'desconocido'}` }
+    }
+
+    console.log("Admin verified, fetching all data...")
+
+    // Si es admin, traer todos los datos
     const { data: teachers, error: teachersError } = await supabase
       .from("teachers")
       .select("*")
@@ -45,6 +55,8 @@ export const getAdminDashboardData = async () => {
       .from("attendance")
       .select("*")
 
+    console.log("Fetched - Teachers:", teachers?.length || 0, "Groups:", groups?.length || 0, "Students:", students?.length || 0, "Attendance:", attendance?.length || 0)
+
     if (teachersError || groupsError || studentsError || attendanceError) {
       return { 
         error: "Error cargando datos",
@@ -59,6 +71,7 @@ export const getAdminDashboardData = async () => {
       attendance: attendance || [],
     }
   } catch (error: any) {
+    console.error("Server action error:", error)
     return { error: error.message }
   }
 }

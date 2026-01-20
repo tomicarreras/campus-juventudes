@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS teachers (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email VARCHAR(255) UNIQUE NOT NULL,
     full_name VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'teacher' CHECK (role IN ('teacher', 'coordinator', 'admin')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
