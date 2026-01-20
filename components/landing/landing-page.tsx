@@ -162,7 +162,7 @@ export function LandingPage() {
           <div className="text-center">
             <div className="mb-6">
               <p className="text-slate-600 mb-4">
-                Hecho con ❤️ por{' '}
+                Desarrollado por{' '}
                 <a 
                   href="https://speaktoday.com.ar/tomi" 
                   target="_blank" 
