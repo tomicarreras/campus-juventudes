@@ -37,16 +37,14 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
       try {
         const supabase = createClient()
 
-        // Traer todos los profesores (role = 'teacher' o 'coordinator', NO admin)
+        // Traer todos los profesores (excluyendo solo admin)
         const { data: teacherData, error: teacherError } = await supabase
           .from("teachers")
           .select("*")
-          .in("role", ["teacher", "coordinator"])
+          .neq("role", "admin")
           .order("full_name")
 
-        if (teacherError && teacherError.code !== "PGRST116") {
-          console.error("Teacher error:", teacherError)
-        }
+        console.log("Teacher data:", teacherData, "Error:", teacherError)
 
         // Traer todos los grupos
         const { data: groupData, error: groupError } = await supabase
@@ -81,6 +79,11 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
         const groupsArray = groupData || []
         const studentsArray = studentData || []
         const attendanceArray = attendanceData || []
+
+        console.log("Load data - Teachers:", teachersArray.length, teachersArray)
+        console.log("Load data - Groups:", groupsArray.length, groupsArray)
+        console.log("Load data - Students:", studentsArray.length)
+        console.log("Load data - Attendance:", attendanceArray.length)
 
         setGroups(groupsArray)
         setStudents(studentsArray)
