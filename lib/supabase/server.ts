@@ -1,4 +1,5 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+import { cookies } from "next/headers"
 
 // Check if Supabase environment variables are available
 export const isSupabaseConfigured =
@@ -7,32 +8,25 @@ export const isSupabaseConfigured =
   typeof process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY === "string" &&
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.length > 0
 
-let supabaseClient: any = null
-
-if (isSupabaseConfigured) {
-  supabaseClient = createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-} else {
-  // Fallback dummy client
-  supabaseClient = {
-    auth: {
-      getUser: () => Promise.resolve({ data: { user: null }, error: null }),
-      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
-      signOut: () => Promise.resolve({ error: null }),
-    },
-    from: () => ({
-      select: () => Promise.resolve({ data: null, error: null }),
-      insert: () => Promise.resolve({ data: null, error: null }),
-      update: () => Promise.resolve({ data: null, error: null }),
-      delete: () => Promise.resolve({ data: null, error: null }),
-      eq: () => ({
-        single: () => Promise.resolve({ data: null, error: null }),
-        order: () => Promise.resolve({ data: null, error: null }),
-      }),
-    }),
+export const createClient = () => {
+  if (!isSupabaseConfigured) {
+    return createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+    )
   }
-}
 
-export const createClient = () => supabaseClient
+  const cookieStore = cookies()
+
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: {
+          cookie: cookieStore.getAll().map(({ name, value }) => `${name}=${value}`).join("; "),
+        },
+      },
+    }
+  )
+}

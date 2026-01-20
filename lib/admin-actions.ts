@@ -1,19 +1,24 @@
 "use server"
 
 import { createClient } from "./supabase/server"
+import { cookies } from "next/headers"
 
 export const getAdminDashboardData = async () => {
-  const supabase = createClient()
-
   try {
-    // Verificar que el usuario es admin
-    const { data: { user } } = await supabase.auth.getUser()
+    const cookieStore = cookies()
+    const supabase = createClient()
+
+    // Obtener la sesión desde los cookies
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
-    if (!user) {
-      return { error: "No autenticado" }
+    console.log("Session check:", session ? "Session found" : "No session", "Error:", sessionError)
+
+    if (!session || sessionError) {
+      return { error: `No autenticado. Error: ${sessionError?.message || "Sin sesión"}` }
     }
 
-    console.log("Admin check - User ID:", user.id, "User email:", user.email)
+    const user = session.user
+    console.log("Admin check - User ID:", user?.id, "User email:", user?.email)
 
     // Traer el rol del usuario desde la BD
     const { data: userData, error: userError } = await supabase
