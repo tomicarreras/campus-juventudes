@@ -4,7 +4,9 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import TeacherProfile from "@/components/teacher/teacher-profile"
-import { Loader2 } from "lucide-react"
+import { Loader2, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function TeacherProfilePage() {
   const router = useRouter()
@@ -34,14 +36,46 @@ export default function TeacherProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Mi Perfil</h1>
-          <p className="text-muted-foreground mt-1">Gestiona tu cuenta y seguridad</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+      <div className="container max-w-3xl py-8 px-4 sm:px-6 lg:px-8">
+        {/* Header con botón de volver */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                asChild 
+                className="hover:bg-primary/10"
+              >
+                <Link href="/dashboard">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+              <h1 className="text-4xl font-bold">Mi Perfil</h1>
+            </div>
+            <p className="text-muted-foreground ml-12">Gestiona tu cuenta y seguridad</p>
+          </div>
         </div>
-        
-        <TeacherProfile />
+
+        {/* Content */}
+        <div className="space-y-6">
+          <TeacherProfile />
+          
+          {/* Botón de volver al dashboard - Mobile friendly */}
+          <div className="flex gap-3 pt-4">
+            <Button 
+              asChild 
+              className="flex-1 h-11 text-base"
+              variant="outline"
+            >
+              <Link href="/dashboard">
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Volver al Dashboard
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   )
