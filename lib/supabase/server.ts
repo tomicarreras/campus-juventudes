@@ -17,6 +17,15 @@ export const createClient = () => {
   }
 
   const cookieStore = cookies()
+  
+  // Construir el string de cookies
+  let cookieHeader = ""
+  try {
+    const allCookies = cookieStore.getAll?.() || []
+    cookieHeader = allCookies.map(({ name, value }) => `${name}=${value}`).join("; ")
+  } catch (e) {
+    console.error("Error getting cookies:", e)
+  }
 
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,7 +33,7 @@ export const createClient = () => {
     {
       global: {
         headers: {
-          cookie: cookieStore.getAll().map(({ name, value }) => `${name}=${value}`).join("; "),
+          ...(cookieHeader && { cookie: cookieHeader }),
         },
       },
     }
