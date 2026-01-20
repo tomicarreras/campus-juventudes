@@ -165,7 +165,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
           isMobile={false}
         />
         <main className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6">
+          <div className="w-full mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
             {renderContent()}
           </div>
         </main>
