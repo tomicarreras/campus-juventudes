@@ -2,9 +2,17 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { LogOut, Menu, X } from "lucide-react"
+import { LogOut, Menu, X, User, Settings } from "lucide-react"
 import { signOut, type AuthUser } from "@/lib/auth"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 
 interface NavbarProps {
   user?: AuthUser | null
@@ -38,15 +46,33 @@ export default function Navbar({ user = null, onMenuToggle, mobileMenuOpen = fal
             <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline truncate max-w-[200px]">
               {user?.full_name || "Profesor"}
             </span>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleSignOut}
-              className="hidden sm:flex text-xs sm:text-base"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="ml-2 hidden sm:inline">Salir</span>
-            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="hidden sm:flex text-xs sm:text-base"
+                >
+                  <Settings className="h-4 w-4" />
+                  <span className="ml-2 hidden sm:inline">Opciones</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/teacher/profile" className="cursor-pointer flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Mi Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-red-600 cursor-pointer flex items-center gap-2">
+                  <LogOut className="h-4 w-4" />
+                  Salir
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button 
               variant="ghost" 
               size="icon" 
