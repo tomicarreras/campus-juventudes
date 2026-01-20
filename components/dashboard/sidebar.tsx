@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Users, Calendar, Gift, Plus, CalendarDays, FileSpreadsheet, LogOut, BarChart3, Gauge } from "lucide-react"
+import { Users, Calendar, Gift, Plus, CalendarDays, FileSpreadsheet, LogOut, BarChart3, Gauge, User } from "lucide-react"
 import { signOut } from "@/lib/auth"
 import { useRouter } from "next/navigation"
 
@@ -100,6 +100,16 @@ export default function Sidebar({
                 Coordinador
               </div>
             )}
+            <Button
+              variant="outline"
+              onClick={() => {
+                window.location.href = "/teacher/profile"
+              }}
+              className="w-full text-xs justify-start"
+            >
+              <User className="h-4 w-4 mr-2" />
+              Mi Perfil
+            </Button>
             <Button
               variant="outline"
               onClick={handleSignOut}
