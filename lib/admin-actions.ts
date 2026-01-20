@@ -1,73 +1,54 @@
 "use server"
 
 import { createClient } from "./supabase/server"
-import { cookies } from "next/headers"
 
 export const getAdminDashboardData = async () => {
   try {
-    const cookieStore = cookies()
     const supabase = createClient()
 
-    // Obtener la sesión desde los cookies
+    // TEST 1: Intentar obtener la sesión
+    console.log("[Server] Intentando obtener sesión...")
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
-    console.log("Session check:", session ? "Session found" : "No session", "Error:", sessionError)
+    console.log("[Server] Session result:", session ? "FOUND" : "NOT FOUND", "Error:", sessionError?.message)
 
-    if (!session || sessionError) {
-      return { error: `No autenticado. Error: ${sessionError?.message || "Sin sesión"}` }
+    if (!session) {
+      console.log("[Server] No session found, attempting getUser...")
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      console.log("[Server] User result:", user ? "FOUND" : "NOT FOUND", "Error:", userError?.message)
+      
+      if (!user) {
+        return { error: "No hay sesión de usuario autenticada" }
+      }
     }
 
-    const user = session.user
-    console.log("Admin check - User ID:", user?.id, "User email:", user?.email)
+    const userId = session?.user?.id || (await supabase.auth.getUser()).data.user?.id
+    console.log("[Server] Using user ID:", userId)
 
-    // Traer el rol del usuario desde la BD
+    // TEST 2: Obtener el usuario de la tabla teachers
     const { data: userData, error: userError } = await supabase
       .from("teachers")
       .select("id, email, role")
-      .eq("id", user.id)
+      .eq("id", userId)
       .single()
 
-    console.log("Admin check - User data:", userData, "Error:", userError)
-
-    if (userError) {
-      return { error: `No se encontró el usuario: ${userError.message}` }
-    }
+    console.log("[Server] Teacher record:", userData, "Error:", userError?.message)
 
     if (!userData || userData.role !== "admin") {
-      return { error: `No tienes permisos. Tu rol es: ${userData?.role || 'desconocido'}` }
+      return { error: `Permiso denegado. Tu rol es: ${userData?.role || 'desconocido'}` }
     }
 
-    console.log("Admin verified, fetching all data...")
+    console.log("[Server] Admin verificado, trayendo datos...")
 
-    // Si es admin, traer todos los datos
-    const { data: teachers, error: teachersError } = await supabase
-      .from("teachers")
-      .select("*")
-      .neq("role", "admin")
-      .order("full_name")
+    // TEST 3: Traer todos los datos
+    const [{ data: teachers }, { data: groups }, { data: students }, { data: attendance }] = await Promise.all([
+      supabase.from("teachers").select("*").neq("role", "admin"),
+      supabase.from("groups").select("*"),
+      supabase.from("students").select("*"),
+      supabase.from("attendance").select("*"),
+    ])
 
-    const { data: groups, error: groupsError } = await supabase
-      .from("groups")
-      .select("*")
-      .order("name")
-
-    const { data: students, error: studentsError } = await supabase
-      .from("students")
-      .select("*")
-      .order("full_name")
-
-    const { data: attendance, error: attendanceError } = await supabase
-      .from("attendance")
-      .select("*")
-
-    console.log("Fetched - Teachers:", teachers?.length || 0, "Groups:", groups?.length || 0, "Students:", students?.length || 0, "Attendance:", attendance?.length || 0)
-
-    if (teachersError || groupsError || studentsError || attendanceError) {
-      return { 
-        error: "Error cargando datos",
-        details: { teachersError, groupsError, studentsError, attendanceError }
-      }
-    }
+    console.log("[Server] Data fetched - Teachers:", teachers?.length || 0, "Groups:", groups?.length || 0)
 
     return {
       teachers: teachers || [],
@@ -76,7 +57,7 @@ export const getAdminDashboardData = async () => {
       attendance: attendance || [],
     }
   } catch (error: any) {
-    console.error("Server action error:", error)
+    console.error("[Server] Error:", error.message)
     return { error: error.message }
   }
 }
