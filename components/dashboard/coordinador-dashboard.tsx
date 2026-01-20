@@ -37,11 +37,11 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
       try {
         const supabase = createClient()
 
-        // Traer todos los profesores (role = 'teacher' solamente, no coordinadores)
+        // Traer todos los profesores (role = 'teacher' o 'coordinator', NO admin)
         const { data: teacherData, error: teacherError } = await supabase
           .from("teachers")
           .select("*")
-          .eq("role", "teacher")
+          .in("role", ["teacher", "coordinator"])
           .order("full_name")
 
         if (teacherError && teacherError.code !== "PGRST116") {
