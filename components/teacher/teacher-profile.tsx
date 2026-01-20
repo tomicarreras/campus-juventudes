@@ -155,12 +155,12 @@ export default function TeacherProfile() {
             
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button className="w-full h-11 text-base flex items-center justify-center gap-2">
+                <Button className="w-full h-12 sm:h-11 text-base sm:text-sm flex items-center justify-center gap-2 font-semibold">
                   <Lock className="h-5 w-5" />
                   Cambiar contraseña
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-md w-[95vw]">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-xl">
                     <div className="bg-primary/10 p-2 rounded-lg">
