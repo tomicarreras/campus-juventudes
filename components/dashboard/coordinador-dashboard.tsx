@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Loader2, Users, BookOpen, TrendingUp } from "lucide-react"
+import { Loader2, Users, BookOpen, TrendingUp, AlertCircle, CheckCircle, Clock } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import type { Teacher, Group, Student, Attendance } from "@/lib/types"
 
@@ -17,6 +17,15 @@ interface TeacherStats {
   groupCount: number
   studentCount: number
   totalAttendance: number
+  attendanceRate: number
+  absentStudents: number
+}
+
+interface AttendanceStats {
+  total: number
+  present: number
+  absent: number
+  rate: number
 }
 
 export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps) {
@@ -30,7 +39,10 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
     totalGroups: 0,
     totalStudents: 0,
     totalAttendanceRecords: 0,
+    globalAttendanceRate: 0,
+    totalAbsences: 0,
   })
+  const [lowAttendanceGroups, setLowAttendanceGroups] = useState<any[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -77,26 +89,64 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
         setGroups(groupsArray)
         setStudents(studentsArray)
 
-        // Calcular stats por profesor
-        const teacherStats: TeacherStats[] = teachersArray.map((teacher) => ({
-          teacher,
-          groupCount: groupsArray.filter((g) => g.teacher_id === teacher.id).length,
-          studentCount: studentsArray.filter((s) =>
-            groupsArray.some((g) => g.id === s.group_id && g.teacher_id === teacher.id)
-          ).length,
-          totalAttendance: attendanceArray.filter((a) =>
-            groupsArray.some((g) => g.id === a.group_id && g.teacher_id === teacher.id)
-          ).length,
-        }))
+        const teacherStats: TeacherStats[] = teachersArray.map((teacher) => {
+          const teacherGroups = groupsArray.filter((g) => g.teacher_id === teacher.id)
+          const teacherStudents = studentsArray.filter((s) =>
+            teacherGroups.some((g) => g.id === s.group_id)
+          )
+          const teacherAttendance = attendanceArray.filter((a) =>
+            teacherGroups.some((g) => g.id === a.group_id)
+          )
+          
+          const presentCount = teacherAttendance.filter((a) => a.present).length
+          const attendanceRate = teacherAttendance.length > 0 
+            ? Math.round((presentCount / teacherAttendance.length) * 100)
+            : 0
+          
+          const absentCount = teacherAttendance.filter((a) => !a.present).length
+          
+          return {
+            teacher,
+            groupCount: teacherGroups.length,
+            studentCount: teacherStudents.length,
+            totalAttendance: teacherAttendance.length,
+            attendanceRate,
+            absentStudents: absentCount,
+          }
+        })
 
         setTeachers(teacherStats)
 
-        // Stats generales
+        // Calcular grupos con baja asistencia
+        const groupAttendance = groupsArray.map((group) => {
+          const groupAttendanceRecords = attendanceArray.filter((a) => a.group_id === group.id)
+          const presentCount = groupAttendanceRecords.filter((a) => a.present).length
+          const rate = groupAttendanceRecords.length > 0 
+            ? Math.round((presentCount / groupAttendanceRecords.length) * 100)
+            : 0
+          return { group, rate, total: groupAttendanceRecords.length, present: presentCount }
+        })
+
+        const lowAttendance = groupAttendance
+          .filter((ga) => ga.total > 0 && ga.rate < 80)
+          .sort((a, b) => a.rate - b.rate)
+          .slice(0, 5)
+
+        setLowAttendanceGroups(lowAttendance)
+
+        // Stats globales
+        const totalPresent = attendanceArray.filter((a) => a.present).length
+        const globalRate = attendanceArray.length > 0
+          ? Math.round((totalPresent / attendanceArray.length) * 100)
+          : 0
+
         setStats({
           totalTeachers: teachersArray.length,
           totalGroups: groupsArray.length,
           totalStudents: studentsArray.length,
           totalAttendanceRecords: attendanceArray.length,
+          globalAttendanceRate: globalRate,
+          totalAbsences: attendanceArray.length - totalPresent,
         })
 
         setLoading(false)
@@ -140,7 +190,7 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
         <p className="text-gray-600">Gestión centralizada de profesores, grupos y asistencias</p>
       </div>
 
-      {/* Stats generales */}
+      {/* Stats generales mejoradas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -172,16 +222,47 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-2 border-blue-200 bg-blue-50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Asistencias</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">Asistencia Global</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.totalAttendanceRecords}</div>
-            <p className="text-xs text-gray-500 mt-1">Registros totales</p>
+            <div className="text-3xl font-bold text-blue-600">{stats.globalAttendanceRate}%</div>
+            <p className="text-xs text-blue-600 mt-1">{stats.totalAbsences} ausencias</p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Grupos con baja asistencia */}
+      {lowAttendanceGroups.length > 0 && (
+        <Card className="border-2 border-orange-200 bg-orange-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-700">
+              <AlertCircle className="h-5 w-5" />
+              Grupos con Baja Asistencia
+            </CardTitle>
+            <CardDescription className="text-orange-600">Requieren atención prioritaria</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {lowAttendanceGroups.map((ga) => (
+                <div key={ga.group.id} className="flex items-center justify-between bg-white p-3 rounded-lg border border-orange-200">
+                  <div>
+                    <p className="font-semibold text-sm">{ga.group.name}</p>
+                    <p className="text-xs text-gray-600">{ga.total} registros</p>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-lg font-bold ${ga.rate < 60 ? 'text-red-600' : 'text-orange-600'}`}>
+                      {ga.rate}%
+                    </div>
+                    <p className="text-xs text-gray-500">{ga.present} presentes</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Listado de Profesores */}
       <Card>
@@ -217,15 +298,19 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
                     Estudiantes
                   </th>
                   <th className="text-center py-3 px-4 font-semibold">
-                    <TrendingUp className="h-4 w-4 inline mr-1" />
-                    Asistencias
+                    <CheckCircle className="h-4 w-4 inline mr-1" />
+                    Asistencia
+                  </th>
+                  <th className="text-center py-3 px-4 font-semibold">
+                    <AlertCircle className="h-4 w-4 inline mr-1" />
+                    Ausencias
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredTeachers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-8 text-gray-500">
+                    <td colSpan={6} className="text-center py-8 text-gray-500">
                       No hay profesores registrados
                     </td>
                   </tr>
@@ -245,8 +330,23 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold">
-                          {ts.totalAttendance}
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          ts.attendanceRate >= 80 
+                            ? 'bg-green-100 text-green-800' 
+                            : ts.attendanceRate >= 60
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {ts.attendanceRate}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          ts.absentStudents > 10
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {ts.absentStudents}
                         </span>
                       </td>
                     </tr>
