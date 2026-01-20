@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Loader2, Users, BookOpen, TrendingUp } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { getAdminDashboardData } from "@/lib/admin-actions"
 import type { Teacher, Group, Student, Attendance } from "@/lib/types"
 
 interface CoordinadorDashboardProps {
@@ -32,27 +31,48 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
     totalStudents: 0,
     totalAttendanceRecords: 0,
   })
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const result = await getAdminDashboardData()
+        const supabase = createClient()
 
-        if (result.error) {
-          console.error("Error:", result.error)
-          setLoading(false)
+        console.log("[Client] Loading admin dashboard data...")
+
+        // Traer directamente desde el cliente
+        const { data: teacherData, error: teacherError } = await supabase
+          .from("teachers")
+          .select("*")
+          .neq("role", "admin")
+          .order("full_name")
+
+        const { data: groupData, error: groupError } = await supabase
+          .from("groups")
+          .select("*")
+          .order("name")
+
+        const { data: studentData, error: studentError } = await supabase
+          .from("students")
+          .select("*")
+          .order("full_name")
+
+        const { data: attendanceData, error: attendanceError } = await supabase
+          .from("attendance")
+          .select("*")
+
+        console.log("[Client] Loaded - Teachers:", teacherData?.length || 0, "Groups:", groupData?.length || 0, "Students:", studentData?.length || 0)
+
+        if (teacherError) {
+          console.error("[Client] Teacher error:", teacherError)
+          setError(`Error traendo profesores: ${teacherError.message}`)
           return
         }
 
-        const teachersArray = result.teachers || []
-        const groupsArray = result.groups || []
-        const studentsArray = result.students || []
-        const attendanceArray = result.attendance || []
-
-        console.log("Load data - Teachers:", teachersArray.length, teachersArray)
-        console.log("Load data - Groups:", groupsArray.length, groupsArray)
-        console.log("Load data - Students:", studentsArray.length)
-        console.log("Load data - Attendance:", attendanceArray.length)
+        const teachersArray = teacherData || []
+        const groupsArray = groupData || []
+        const studentsArray = studentData || []
+        const attendanceArray = attendanceData || []
 
         setGroups(groupsArray)
         setStudents(studentsArray)
@@ -80,8 +100,9 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
         })
 
         setLoading(false)
-      } catch (error) {
-        console.error("Error loading coordinator data:", error)
+      } catch (err: any) {
+        console.error("[Client] Error loading coordinator data:", err)
+        setError(`Error: ${err.message}`)
         setLoading(false)
       }
     }
@@ -99,6 +120,15 @@ export default function CoordinadorDashboard({ user }: CoordinadorDashboardProps
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <p className="font-bold">Error al cargar el dashboard</p>
+        <p>{error}</p>
       </div>
     )
   }
