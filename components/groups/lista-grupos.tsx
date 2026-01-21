@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import EditarGrupoForm from "@/components/groups/editar-grupo-form"
 import { toast } from "@/hooks/use-toast"
 import type { Group } from "@/lib/types"
-import { Copy } from "lucide-react"
+import { Copy, ArrowUp, ArrowDown } from "lucide-react"
 
 interface ListaGruposProps {
   refreshTrigger?: number
@@ -25,7 +25,7 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
   const fetchGroups = async () => {
     setLoading(true)
     const supabase = createClient()
-    const { data, error } = await supabase.from("groups").select("*").order("name")
+    const { data, error } = await supabase.from("groups").select("*").order("order", { ascending: true })
     if (!error && data) setGrupos(data)
     setLoading(false)
   }
@@ -119,6 +119,28 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
     }
   }
 
+  const handleReorder = async (groupId: string, direction: 'up' | 'down') => {
+    const currentIndex = grupos.findIndex(g => g.id === groupId)
+    if (direction === 'up' && currentIndex === 0) return
+    if (direction === 'down' && currentIndex === grupos.length - 1) return
+
+    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+    const supabase = createClient()
+
+    try {
+      // Intercambiar órdenes
+      const currentOrder = grupos[currentIndex].order || 0
+      const swapOrder = grupos[newIndex].order || 0
+
+      await supabase.from("groups").update({ order: swapOrder }).eq("id", groupId)
+      await supabase.from("groups").update({ order: currentOrder }).eq("id", grupos[newIndex].id)
+
+      fetchGroups()
+    } catch (error) {
+      toast({ title: "Error", description: "No se pudo reordenar el grupo", variant: "destructive" })
+    }
+  }
+
   if (editingGroup) {
     return (
       <EditarGrupoForm
@@ -138,11 +160,33 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
           No hay grupos creados aún. ¡Crea el primero!
         </div>
       ) : (
-        grupos.map(group => (
+        grupos.map((group, index) => (
           <div 
             key={group.id} 
             className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition"
           >
+            <div className="flex gap-1 flex-shrink-0">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleReorder(group.id, 'up')}
+                disabled={index === 0}
+                className="h-8 w-8 p-0"
+                title="Mover arriba"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => handleReorder(group.id, 'down')}
+                disabled={index === grupos.length - 1}
+                className="h-8 w-8 p-0"
+                title="Mover abajo"
+              >
+                <ArrowDown className="h-4 w-4" />
+              </Button>
+            </div>
             <div 
               className="flex-1 cursor-pointer hover:underline min-w-0"
               onClick={() => onSelectGroup && onSelectGroup(group)}
