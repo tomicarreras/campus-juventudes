@@ -149,16 +149,21 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
     const supabase = createClient()
 
     try {
-      // Intercambiar órdenes
+      // Actualización optimista: reordenar localmente de inmediato
+      const newGrupos = [...grupos]
+      ;[newGrupos[draggedIndex], newGrupos[targetIndex]] = [newGrupos[targetIndex], newGrupos[draggedIndex]]
+      setGrupos(newGrupos)
+
+      // Luego actualizar en la BD en background
       const draggedOrder = grupos[draggedIndex].order || 0
       const targetOrder = grupos[targetIndex].order || 0
 
       await supabase.from("groups").update({ order: targetOrder }).eq("id", draggedGroup)
       await supabase.from("groups").update({ order: draggedOrder }).eq("id", targetGroupId)
-
-      fetchGroups()
     } catch (error) {
       toast({ title: "Error", description: "No se pudo reordenar el grupo", variant: "destructive" })
+      // Si falla, recargar para sincronizar con la BD
+      fetchGroups()
     } finally {
       setDraggedGroup(null)
     }
