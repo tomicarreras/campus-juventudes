@@ -121,9 +121,6 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
     }
   }
 
-  const [draggedGroup, setDraggedGroup] = useState<string | null>(null)
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
-
   const handleDragStart = (e: React.DragEvent, groupId: string) => {
     setDraggedGroup(groupId)
     e.dataTransfer.effectAllowed = "move"
