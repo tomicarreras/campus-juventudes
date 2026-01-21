@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import EditarGrupoForm from "@/components/groups/editar-grupo-form"
 import { toast } from "@/hooks/use-toast"
 import type { Group } from "@/lib/types"
-import { Copy, ArrowUp, ArrowDown } from "lucide-react"
+import { Copy, GripVertical } from "lucide-react"
 
 interface ListaGruposProps {
   refreshTrigger?: number
@@ -119,6 +119,51 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
     }
   }
 
+  const [draggedGroup, setDraggedGroup] = useState<string | null>(null)
+
+  const handleDragStart = (e: React.DragEvent, groupId: string) => {
+    setDraggedGroup(groupId)
+    e.dataTransfer.effectAllowed = "move"
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = "move"
+  }
+
+  const handleDrop = async (e: React.DragEvent, targetGroupId: string) => {
+    e.preventDefault()
+    if (!draggedGroup || draggedGroup === targetGroupId) {
+      setDraggedGroup(null)
+      return
+    }
+
+    const draggedIndex = grupos.findIndex(g => g.id === draggedGroup)
+    const targetIndex = grupos.findIndex(g => g.id === targetGroupId)
+
+    if (draggedIndex === -1 || targetIndex === -1) {
+      setDraggedGroup(null)
+      return
+    }
+
+    const supabase = createClient()
+
+    try {
+      // Intercambiar órdenes
+      const draggedOrder = grupos[draggedIndex].order || 0
+      const targetOrder = grupos[targetIndex].order || 0
+
+      await supabase.from("groups").update({ order: targetOrder }).eq("id", draggedGroup)
+      await supabase.from("groups").update({ order: draggedOrder }).eq("id", targetGroupId)
+
+      fetchGroups()
+    } catch (error) {
+      toast({ title: "Error", description: "No se pudo reordenar el grupo", variant: "destructive" })
+    } finally {
+      setDraggedGroup(null)
+    }
+  }
+
   const handleReorder = async (groupId: string, direction: 'up' | 'down') => {
     const currentIndex = grupos.findIndex(g => g.id === groupId)
     if (direction === 'up' && currentIndex === 0) return
@@ -163,29 +208,16 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
         grupos.map((group, index) => (
           <div 
             key={group.id} 
-            className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition"
+            className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition cursor-move ${
+              draggedGroup === group.id ? 'opacity-50 bg-blue-50' : ''
+            }`}
+            draggable
+            onDragStart={(e) => handleDragStart(e, group.id)}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, group.id)}
           >
-            <div className="flex gap-1 flex-shrink-0">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => handleReorder(group.id, 'up')}
-                disabled={index === 0}
-                className="h-8 w-8 p-0"
-                title="Mover arriba"
-              >
-                <ArrowUp className="h-4 w-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => handleReorder(group.id, 'down')}
-                disabled={index === grupos.length - 1}
-                className="h-8 w-8 p-0"
-                title="Mover abajo"
-              >
-                <ArrowDown className="h-4 w-4" />
-              </Button>
+            <div className="flex items-center gap-2">
+              <GripVertical className="h-5 w-5 text-gray-400 flex-shrink-0" />
             </div>
             <div 
               className="flex-1 cursor-pointer hover:underline min-w-0"
