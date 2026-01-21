@@ -32,12 +32,15 @@ export default function CrearGrupoForm({ onGroupCreated }: CrearGrupoFormProps) 
     const place = formData.get("place") as string
     const scheduleDate = formData.get("scheduleDate") as string
     const scheduleTime = formData.get("scheduleTime") as string
+    const days = formData.get("days") as string
 
     try {
       const { user } = await getCurrentUser()
       if (!user) {
         throw new Error("Usuario no autenticado")
       }
+
+      const currentYear = new Date().getFullYear()
 
       const { error: insertError } = await supabase.from("groups").insert([
         {
@@ -46,6 +49,8 @@ export default function CrearGrupoForm({ onGroupCreated }: CrearGrupoFormProps) 
           place,
           schedule_date: scheduleDate,
           schedule_time: scheduleTime || null,
+          days: days || null,
+          year: currentYear,
           teacher_id: user.id,
         },
       ])
@@ -131,6 +136,18 @@ export default function CrearGrupoForm({ onGroupCreated }: CrearGrupoFormProps) 
               </label>
               <Input id="scheduleTime" name="scheduleTime" type="time" disabled={loading} />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="days" className="text-sm font-medium">
+              Día/s (ej: Lunes, Lunes y Miércoles, etc.)
+            </label>
+            <Input 
+              id="days" 
+              name="days" 
+              placeholder="ej: Lunes, Lunes y Miércoles"
+              disabled={loading}
+            />
           </div>
 
           <Button type="submit" disabled={loading} className="w-full">

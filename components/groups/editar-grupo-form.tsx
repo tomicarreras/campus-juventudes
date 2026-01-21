@@ -18,6 +18,7 @@ export default function EditarGrupoForm({ group, onUpdated, onCancel }: EditarGr
   const [name, setName] = useState(group.name)
   const [place, setPlace] = useState(group.place)
   const [description, setDescription] = useState(group.description || "")
+  const [days, setDays] = useState((group as any).days || "")
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,7 +27,7 @@ export default function EditarGrupoForm({ group, onUpdated, onCancel }: EditarGr
     const supabase = createClient()
     const { error } = await supabase
       .from("groups")
-      .update({ name, place, description })
+      .update({ name, place, description, days: days || null })
       .eq("id", group.id)
     setLoading(false)
     if (error) {
@@ -42,6 +43,7 @@ export default function EditarGrupoForm({ group, onUpdated, onCancel }: EditarGr
       <Input value={name} onChange={e => setName(e.target.value)} placeholder="Nombre del grupo" required />
       <Input value={place} onChange={e => setPlace(e.target.value)} placeholder="Lugar" required />
       <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Descripción" />
+      <Input value={days} onChange={e => setDays(e.target.value)} placeholder="Día/s (ej: Lunes, Lunes y Miércoles)" />
       <div className="flex gap-2">
         <Button type="submit" disabled={loading}>{loading ? "Guardando..." : "Guardar cambios"}</Button>
         <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>

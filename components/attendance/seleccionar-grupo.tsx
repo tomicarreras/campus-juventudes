@@ -105,6 +105,17 @@ export default function SeleccionarGrupo({ onSelectGroup }: SeleccionarGrupoProp
                     {group.schedule_time}
                   </div>
                 )}
+                {(group as any).days && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs">📅</span>
+                    <span className="text-xs">{(group as any).days}</span>
+                  </div>
+                )}
+                {(group as any).year && (
+                  <div className="text-xs text-gray-600">
+                    Año: {(group as any).year}
+                  </div>
+                )}
               </div>
               <Button onClick={() => onSelectGroup(group)} className="w-full text-sm">
                 <CheckSquare className="h-4 w-4 mr-2" />

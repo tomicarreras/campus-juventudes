@@ -157,7 +157,13 @@ export default function EstadisticasAsistencia({ group, onBack }: EstadisticasAs
         ← Volver
       </button>
 
-      <h2 className="text-2xl font-bold">{group.name} - Estadísticas de Asistencia</h2>
+      <div>
+        <h2 className="text-2xl font-bold">{group.name} - Estadísticas de Asistencia</h2>
+        <div className="text-sm text-gray-600 mt-2 space-y-0.5">
+          {(group as any).days && <p>📅 Día/s: {(group as any).days}</p>}
+          {(group as any).year && <p>Año: {(group as any).year}</p>}
+        </div>
+      </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
