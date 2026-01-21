@@ -20,6 +20,8 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
   const [editingGroup, setEditingGroup] = useState<Group | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [duplicating, setDuplicating] = useState<string | null>(null)
+  const [draggedGroup, setDraggedGroup] = useState<string | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   // Fetch groups
   const fetchGroups = async () => {
@@ -120,26 +122,33 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
   }
 
   const [draggedGroup, setDraggedGroup] = useState<string | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const handleDragStart = (e: React.DragEvent, groupId: string) => {
     setDraggedGroup(groupId)
     e.dataTransfer.effectAllowed = "move"
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = "move"
+    setDragOverIndex(index)
   }
 
-  const handleDrop = async (e: React.DragEvent, targetGroupId: string) => {
+  const handleDragLeave = () => {
+    setDragOverIndex(null)
+  }
+
+  const handleDrop = async (e: React.DragEvent, targetGroupId: string, targetIndex: number) => {
     e.preventDefault()
+    setDragOverIndex(null)
+    
     if (!draggedGroup || draggedGroup === targetGroupId) {
       setDraggedGroup(null)
       return
     }
 
     const draggedIndex = grupos.findIndex(g => g.id === draggedGroup)
-    const targetIndex = grupos.findIndex(g => g.id === targetGroupId)
 
     if (draggedIndex === -1 || targetIndex === -1) {
       setDraggedGroup(null)
@@ -211,23 +220,28 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
         </div>
       ) : (
         grupos.map((group, index) => (
-          <div 
-            key={group.id} 
-            className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg transition ${
-              draggedGroup === group.id 
-                ? 'bg-blue-100 shadow-lg scale-105 border-blue-400' 
-                : 'hover:bg-gray-50 cursor-grab active:cursor-grabbing'
-            }`}
-            draggable
-            onDragStart={(e) => handleDragStart(e, group.id)}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, group.id)}
-          >
-            <div className="flex items-center gap-2">
-              <GripVertical className={`h-5 w-5 flex-shrink-0 transition ${
-                draggedGroup === group.id ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
-              }`} />
-            </div>
+          <div key={group.id}>
+            {dragOverIndex === index && draggedGroup !== group.id && (
+              <div className="h-1 bg-blue-500 rounded-full mb-2 animate-pulse"></div>
+            )}
+            <div 
+              className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg transition ${
+                draggedGroup === group.id 
+                  ? 'bg-blue-100 shadow-lg scale-105 border-blue-400' 
+                  : dragOverIndex === index ? 'bg-blue-50 border-blue-300'
+                  : 'hover:bg-gray-50 cursor-grab active:cursor-grabbing'
+              }`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, group.id)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, group.id, index)}
+            >
+              <div className="flex items-center gap-2">
+                <GripVertical className={`h-5 w-5 flex-shrink-0 transition ${
+                  draggedGroup === group.id ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                }`} />
+              </div>
             <div 
               className="flex-1 cursor-pointer hover:underline min-w-0"
               onClick={() => onSelectGroup && onSelectGroup(group)}
@@ -268,6 +282,7 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
               >
                 {deleting ? "Borrando..." : "Borrar"}
               </Button>
+            </div>
             </div>
           </div>
         ))
