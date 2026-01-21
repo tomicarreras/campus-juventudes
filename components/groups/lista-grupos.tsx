@@ -213,8 +213,10 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
         grupos.map((group, index) => (
           <div 
             key={group.id} 
-            className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg hover:bg-gray-50 transition cursor-move ${
-              draggedGroup === group.id ? 'opacity-50 bg-blue-50' : ''
+            className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 sm:p-4 border rounded-lg transition ${
+              draggedGroup === group.id 
+                ? 'bg-blue-100 shadow-lg scale-105 border-blue-400' 
+                : 'hover:bg-gray-50 cursor-grab active:cursor-grabbing'
             }`}
             draggable
             onDragStart={(e) => handleDragStart(e, group.id)}
@@ -222,7 +224,9 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
             onDrop={(e) => handleDrop(e, group.id)}
           >
             <div className="flex items-center gap-2">
-              <GripVertical className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <GripVertical className={`h-5 w-5 flex-shrink-0 transition ${
+                draggedGroup === group.id ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
+              }`} />
             </div>
             <div 
               className="flex-1 cursor-pointer hover:underline min-w-0"
