@@ -140,7 +140,7 @@ export default function CrearGrupoForm({ onGroupCreated }: CrearGrupoFormProps) 
 
           <div className="space-y-2">
             <label htmlFor="days" className="text-sm font-medium">
-              Día/s (ej: Lunes, Lunes y Miércoles, etc.)
+              Día/s
             </label>
             <Input 
               id="days" 
