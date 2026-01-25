@@ -89,7 +89,7 @@ export function LandingPage() {
             <Button
               onClick={() => router.push('/auth/login')}
               size="lg"
-              className="bg-slate-700 hover:bg-slate-800 text-white text-lg px-8 py-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
+              className="bg-sky-500 hover:bg-sky-600 text-white text-lg px-8 py-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
             >
               Comenzar ahora
               <ArrowRight className="ml-2 w-5 h-5" />
@@ -148,7 +148,7 @@ export function LandingPage() {
           <Button
             onClick={() => router.push('/auth/registro')}
             size="lg"
-            className="bg-slate-700 hover:bg-slate-800 text-white text-lg px-8 py-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
+            className="bg-sky-500 hover:bg-sky-600 text-white text-lg px-8 py-6 rounded-lg shadow-lg hover:shadow-xl transition-all"
           >
             Registrate
             <ArrowRight className="ml-2 w-5 h-5" />
@@ -167,7 +167,7 @@ export function LandingPage() {
                   href="https://speaktoday.com.ar/tomi" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-slate-800 hover:text-slate-600 transition font-semibold"
+                  className="text-primary hover:text-primary/80 transition font-semibold"
                 >
                   tomi
                 </a>
@@ -176,7 +176,7 @@ export function LandingPage() {
                 ¿Preguntas? Contactanos en{' '}
                 <a 
                   href="mailto:contacto@campusjuventudes.com.ar"
-                  className="text-slate-800 hover:text-slate-600 transition font-semibold"
+                  className="text-primary hover:text-primary/80 transition font-semibold"
                 >
                   contacto@campusjuventudes.com.ar
                 </a>
