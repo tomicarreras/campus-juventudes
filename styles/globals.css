@@ -12,6 +12,11 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: #098DBE;
   --primary-foreground: #ffffff;
+
+  /* 🔥 Agregá estas */
+  --color-primary: #098DBE;
+  --color-primary-foreground: #ffffff;
+}
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
