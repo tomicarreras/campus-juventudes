@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -46,9 +46,6 @@ export default function SeleccionarGrupo({ onSelectGroup }: SeleccionarGrupoProp
     loadGroups()
   }, [])
 
-  
-
-
   if (loading) {
     return <div className="text-center py-8">Cargando grupos...</div>
   }
@@ -68,7 +65,7 @@ export default function SeleccionarGrupo({ onSelectGroup }: SeleccionarGrupoProp
   return (
     <div className="space-y-4 max-w-6xl">
       <div>
-        <h2 className="text-2xl sm:text-3xl font-bold">Seleccionar Grupo para Asistencia</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold">Seleccioná el grupo para guardar la asistencia</h2>
       </div>
       <div className="grid grid-cols-1 gap-4">
         {groups.map((group, index) => (
@@ -89,11 +86,11 @@ export default function SeleccionarGrupo({ onSelectGroup }: SeleccionarGrupoProp
             <CardContent>
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4">
                 <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4 flex-shrink-0" />
+                  <MapPin className="h-4 w-4 flex-shrink-0 text-slate-600" />
                   <span className="truncate">{group.place}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4 flex-shrink-0" />
+                  <Calendar className="h-4 w-4 flex-shrink-0 text-slate-600" />
                   {(() => {
                     const [year, month, day] = group.schedule_date.split("-").map(Number)
                     return new Date(year, month - 1, day).toLocaleDateString("es-AR")
@@ -101,19 +98,31 @@ export default function SeleccionarGrupo({ onSelectGroup }: SeleccionarGrupoProp
                 </div>
                 {group.schedule_time && (
                   <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4 flex-shrink-0" />
-                    {group.schedule_time}
+                    <Clock className="h-4 w-4 flex-shrink-0 text-slate-600" />
+                    <span>{group.schedule_time}</span>
                   </div>
                 )}
+
+                {/* UNIFICADO: Días (sin emoji) */}
                 {(group as any).days && (
                   <div className="flex items-center gap-1">
-                    <span className="text-xs">📅</span>
-                    <span className="text-xs">{(group as any).days}</span>
+                    <Calendar className="h-4 w-4 flex-shrink-0 text-slate-600" />
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-700 font-medium">Días:</span>
+                      <span className="truncate">{(group as any).days}</span>
+                    </div>
                   </div>
                 )}
+
+                {/* UNIFICADO: Año (misma tipografía que el resto) */}
                 {(group as any).year && (
-                  <div className="text-xs text-gray-600">
-                    Año: {(group as any).year}
+                  <div className="flex items-center gap-1">
+                    {/* uso el mismo icono de calendario para consistencia visual */}
+                    <Calendar className="h-4 w-4 flex-shrink-0 text-slate-600" />
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-slate-700 font-medium">Año:</span>
+                      <span>{(group as any).year}</span>
+                    </div>
                   </div>
                 )}
               </div>
