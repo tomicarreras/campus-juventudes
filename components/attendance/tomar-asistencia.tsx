@@ -248,7 +248,7 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base sm:text-lg">Lista de Estudiantes</CardTitle>
+          <CardTitle className="text-base sm:text-lg">Lista de estudiantes</CardTitle>
         </CardHeader>
         <CardContent>
           {students.length === 0 ? (
@@ -301,7 +301,7 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      Guardar Asistencia
+                      Guardar asistencia
                     </>
                   )}
                 </Button>
@@ -321,7 +321,7 @@ export default function TomarAsistencia({ group, onBack }: TomarAsistenciaProps)
                     ) : (
                       <>
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Eliminar Asistencia
+                        Eliminar asistencia
                       </>
                     )}
                   </Button>

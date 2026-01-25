@@ -158,9 +158,9 @@ export default function EstadisticasAsistencia({ group, onBack }: EstadisticasAs
       </button>
 
       <div>
-        <h2 className="text-2xl font-bold">{group.name} - Estadísticas de Asistencia</h2>
+        <h2 className="text-2xl font-bold">{group.name} - Estadísticas de asistencia</h2>
         <div className="text-sm text-gray-600 mt-2 space-y-0.5">
-          {(group as any).days && <p>📅 Día/s: {(group as any).days}</p>}
+          {(group as any).days && <p>Día/s: {(group as any).days}</p>}
           {(group as any).year && <p>Año: {(group as any).year}</p>}
         </div>
       </div>
@@ -178,7 +178,7 @@ export default function EstadisticasAsistencia({ group, onBack }: EstadisticasAs
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Asistencia Promedio</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Asistencia promedio</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{groupStats.average}%</div>
@@ -187,7 +187,7 @@ export default function EstadisticasAsistencia({ group, onBack }: EstadisticasAs
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Registros</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Total registros</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{studentStats.reduce((sum, s) => sum + s.total_classes, 0)}</div>
@@ -232,7 +232,7 @@ export default function EstadisticasAsistencia({ group, onBack }: EstadisticasAs
         {/* Bar Chart - Top Ausencias */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Estudiantes con Más Ausencias</CardTitle>
+            <CardTitle className="text-lg">Estudiantes con más ausencias</CardTitle>
           </CardHeader>
           <CardContent>
             {absenceRanking.length > 0 ? (
@@ -255,7 +255,7 @@ export default function EstadisticasAsistencia({ group, onBack }: EstadisticasAs
         {monthlyStats.length > 0 && (
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg">Tendencias Mensuales</CardTitle>
+              <CardTitle className="text-lg">Tendencias mensuales</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -277,7 +277,7 @@ export default function EstadisticasAsistencia({ group, onBack }: EstadisticasAs
       {/* Tabla de Estudiantes */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Detalle por Estudiante</CardTitle>
+          <CardTitle className="text-lg">Detalle por estudiante</CardTitle>
           <CardDescription>Asistencia y ausencias de cada estudiante</CardDescription>
         </CardHeader>
         <CardContent>

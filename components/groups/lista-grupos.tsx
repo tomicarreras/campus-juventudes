@@ -246,7 +246,7 @@ export default function ListaGrupos({ refreshTrigger, onSelectGroup }: ListaGrup
               <h3 className="font-semibold text-sm sm:text-base truncate">{group.name}</h3>
               <p className="text-xs sm:text-sm text-gray-600 truncate">{group.place}</p>
               <div className="text-xs text-gray-500 mt-1 space-y-0.5">
-                {(group as any).days && <p>📅 {(group as any).days}</p>}
+                {(group as any).days && <p>Día/s: {(group as any).days}</p>}
                 {(group as any).year && <p>Año: {(group as any).year}</p>}
               </div>
             </div>
