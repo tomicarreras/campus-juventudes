@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Users, MapPin, Calendar, Clock, CheckSquare, CalendarDays, Hash } from "lucide-react"
+import { Users, MapPin, Calendar, Clock, CheckSquare, CalendarDays, Hash, Award } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import { getCurrentUser } from "@/lib/auth"
 import type { Group } from "@/lib/types"
@@ -113,7 +113,7 @@ export default function SeleccionarGrupo({ onSelectGroup }: SeleccionarGrupoProp
 
 {(group as any).year && (
   <div className="flex items-center gap-1">
-    <Calendar className="h-4 w-4 flex-shrink-0 text-slate-600" />
+    <Award className="h-4 w-4 flex-shrink-0 text-slate-600" />
     <span className="text-gray-600">{(group as any).year}</span>
   </div>
 )}
