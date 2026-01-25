@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Users, MapPin, Calendar, Clock, CheckSquare } from "lucide-react"
+import { Users, MapPin, Calendar, Clock, CheckSquare, CalendarDays, Hash } from "lucide-react"
 import { supabase } from "@/lib/supabase/client"
 import { getCurrentUser } from "@/lib/auth"
 import type { Group } from "@/lib/types"
@@ -105,26 +105,19 @@ export default function SeleccionarGrupo({ onSelectGroup }: SeleccionarGrupoProp
 
                 {/* UNIFICADO: Días (sin emoji) */}
                 {(group as any).days && (
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4 flex-shrink-0 text-slate-600" />
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-slate-700 font-medium">Días:</span>
-                      <span className="truncate">{(group as any).days}</span>
-                    </div>
-                  </div>
-                )}
+  <div className="flex items-center gap-1">
+    <Calendar className="h-4 w-4 flex-shrink-0 text-slate-600" />
+    <span className="truncate text-gray-600">{(group as any).days}</span>
+  </div>
+)}
 
-                {/* UNIFICADO: Año (misma tipografía que el resto) */}
-                {(group as any).year && (
-                  <div className="flex items-center gap-1">
-                    {/* uso el mismo icono de calendario para consistencia visual */}
-                    <Calendar className="h-4 w-4 flex-shrink-0 text-slate-600" />
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-slate-700 font-medium">Año:</span>
-                      <span>{(group as any).year}</span>
-                    </div>
-                  </div>
-                )}
+{(group as any).year && (
+  <div className="flex items-center gap-1">
+    <Calendar className="h-4 w-4 flex-shrink-0 text-slate-600" />
+    <span className="text-gray-600">{(group as any).year}</span>
+  </div>
+)}
+
               </div>
               <Button onClick={() => onSelectGroup(group)} className="w-full text-sm">
                 <CheckSquare className="h-4 w-4 mr-2" />
