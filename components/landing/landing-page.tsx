@@ -54,7 +54,7 @@ export function LandingPage() {
             </div>
             <Button
               onClick={() => router.push('/auth/login')}
-              className="bg-slate-700 hover:bg-slate-800 text-white"
+              className="bg-sky-500 hover:bg-sky-600 text-white"
             >
               Iniciar sesión
             </Button>
