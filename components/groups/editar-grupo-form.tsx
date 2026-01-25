@@ -43,7 +43,7 @@ export default function EditarGrupoForm({ group, onUpdated, onCancel }: EditarGr
       <Input value={name} onChange={e => setName(e.target.value)} placeholder="Nombre del grupo" required />
       <Input value={place} onChange={e => setPlace(e.target.value)} placeholder="Lugar" required />
       <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Descripción" />
-      <Input value={days} onChange={e => setDays(e.target.value)} placeholder="Día/s (ej: Lunes, Lunes y Miércoles)" />
+      <Input value={days} onChange={e => setDays(e.target.value)} placeholder="Día/s" />
       <div className="flex gap-2">
         <Button type="submit" disabled={loading}>{loading ? "Guardando..." : "Guardar cambios"}</Button>
         <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
